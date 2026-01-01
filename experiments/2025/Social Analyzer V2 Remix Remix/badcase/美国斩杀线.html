@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Dive: American Red Line Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for gradients, animations, and specific elements */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            animation-delay: 0.5s;
+            opacity: 0; /* Start invisible */
+        }
+
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 7s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        @keyframes pulse-slow {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+
+        .card {
+            background: linear-gradient(145deg, rgba(25, 33, 44, 0.7), rgba(15, 20, 27, 0.7)); /* Glassmorphism base */
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem; /* Large radius for glassmorphism feel */
+            border: 1px solid transparent; /* Default transparent border */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 60px rgba(0, 0, 0, 0.2); /* Deeper shadow */
+        }
+        .card:hover {
+            border-color: rgba(0, 191, 255, 0.4); /* Accent blue border on hover */
+            box-shadow: 0 6px 80px rgba(0, 191, 255, 0.1), 0 0 20px rgba(0, 191, 255, 0.2); /* Subtle glow */
+            transform: translateY(-5px);
+        }
+
+        .card-hover-scale:hover {
+            transform: scale(1.02); /* Slight scale on hover */
+            box-shadow: 0 10px 30px rgba(0, 191, 255, 0.2);
+        }
+
+        /* Custom list styling with glowing bullet points */
+        .list-glow li {
+            position: relative;
+            padding-left: 1.5rem; /* Space for the custom bullet */
+        }
+        .list-glow li::before {
+            content: ""; /* Using a pseudo-element for the bullet */
+            position: absolute;
+            left: 0;
+            top: 0.4em; /* Adjust vertically */
+            width: 0.6em;
+            height: 0.6em;
+            background: radial-gradient(circle at center, var(--tw-colors-accent-blue), transparent 60%);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--tw-colors-accent-blue), 0 0 15px var(--tw-colors-accent-blue) inset; /* Glowing effect */
+        }
+
+        /* Mobile specific adjustments for Section IV flow-like structure */
+        @media (max-width: 767px) {
+            .flow-step-mobile-card {
+                border-bottom: 2px solid theme('colors.accent-blue'); /* Add a bottom border to cards for separation on mobile */
+                margin-bottom: 1rem;
+            }
+            .flow-step-mobile-text {
+                margin-top: 1rem;
+            }
+            .flow-step-arrow {
+                display: none; /* Hide arrow on mobile */
+            }
+
+            /* Section VI timeline specific mobile adjustments */
+            .timeline-container.md\:block::after {
+                display: none; /* Hide the vertical line on mobile */
+            }
+            .timeline-container > div.relative.flex {
+                flex-direction: column; /* Stack steps vertically on mobile */
+                align-items: flex-start;
+            }
+            .timeline-container > div.relative.flex .w-full {
+                width: 100%; /* Full width for content on mobile */
+            }
+            .timeline-container > div.relative.flex > .absolute {
+                position: static; /* Remove absolute positioning for numbers */
+                transform: none; /* Reset transform */
+                margin-bottom: 1rem; /* Space below numbers */
+                order: -1; /* Place number above content */
+                align-self: flex-start;
+                margin-left: 0.5rem; /* Indent numbers slightly */
+            }
+            .timeline-container > div.relative.flex > .card {
+                margin-left: 0; /* Align card content */
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Outfit', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'bg-dark': '#0D1117',
+                        'bg-card': 'rgba(25, 33, 44, 0.7)', /* Darker, slightly transparent for glassmorphism */
+                        'accent-blue': '#00BFFF', /* Deep Sky Blue */
+                        'accent-purple': '#8A2BE2', /* Blue Violet */
+                        'text-light': '#E2E8F0',
+                        'text-muted': '#9CA3AF',
+                        'border-glow': 'rgba(0, 191, 255, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bg-dark text-text-light font-body antialiased relative overflow-x-hidden">
+    <!-- Background subtle gradient/texture -->
+    <div class="absolute inset-0 z-0 opacity-20">
+        <div class="absolute top-0 left-0 w-80 h-80 bg-accent-blue rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div class="absolute top-0 right-0 w-80 h-80 bg-accent-purple rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-0 left-1/2 w-80 h-80 bg-accent-blue rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <div class="relative z-10 min-h-screen py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <!-- Header/Title Section -->
+        <header class="text-center mb-16 relative">
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-text-light leading-tight mb-4 tracking-tight">
+                Deep Dive: <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-blue to-accent-purple">American Red Line</span> Analysis
+            </h1>
+            <p class="text-xl sm:text-2xl text-text-muted max-w-3xl mx-auto mb-8 animate-fade-in">
+                Unpacking Chinese Social Media Discourse on Geopolitical & Socio-Economic "Red Lines"
+            </p>
+            <div class="relative inline-block px-6 py-3 border border-accent-blue rounded-full shadow-lg hover:shadow-accent-blue/50 transition-all duration-300 group">
+                <span class="text-accent-blue font-semibold text-lg group-hover:text-text-light relative z-10">Comprehensive Report Overview</span>
+                <div class="absolute inset-0 rounded-full bg-gradient-to-r from-accent-blue to-accent-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"></div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Section I: Limitations (Full Width) -->
+            <section class="card p-8 lg:col-span-3 mb-8">
+                <h2 class="text-3xl sm:text-4xl font-display font-bold text-text-light mb-6">I. Limitations of "Key Topic Identification" for Deep Contextual Analysis</h2>
+                <p class="text-lg text-text-muted mb-6 leading-relaxed">The existing definition of "Key Topic Identification" is insufficient for a deep understanding of the "American Red Line" concept and its political, economic, and socio-cultural context on Chinese social media. Its shortcomings include:</p>
+                <ul class="space-y-4 text-text-light list-none pl-0 list-glow">
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Lack of Deep Contextual Analysis:</strong> It focuses on surface-level theme extraction and cannot automatically identify or explain the deep historical, political, economic, and socio-cultural contexts embedded in the metaphorical and highly politicized phrase "American Red Line."
+                    </li>
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Failure to Capture Emotion and Stance:</strong> It typically does not include the identification of complex emotions like sentiment, sarcasm, hatred, or support, which are crucial for understanding the true stance and potential influence of discussions.
+                    </li>
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Ignoring Narrative Structure and Discourse Strategies:</strong> Deep understanding requires analyzing narrative patterns, rhetorical strategies, information sources (official media, self-media, netizens), and their credibility, which are not covered by simple "themes."
+                    </li>
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Lack of Insight into Subtext and Ideology:</strong> The phrase may reflect specific ideologies, nationalist sentiments, or predictions about US-China relations, which topic identification struggles to reveal.
+                    </li>
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Inability to Assess Dynamic Changes and Interactions:</strong> The evolution of discussions, interactions between different groups, the impact of censorship, and how specific events trigger and shape discussions cannot be fully understood through topic identification alone.
+                    </li>
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Failure to Cover Influence Assessment:</strong> Deep understanding also requires assessing the potential impact of the concept on Chinese society and policy-making, which goes beyond simple topic identification.
+                    </li>
+                </ul>
+                <p class="text-lg text-text-muted mt-6 leading-relaxed">Therefore, a comprehensive analysis requires integrating advanced methods like sentiment analysis, narrative analysis, discourse analysis, social network analysis, contextual historical analysis, and cross-cultural interpretation alongside topic extraction.</p>
+            </section>
+
+            <!-- Section II: Review Plan for Topic Extraction Methods (2-column grid of cards) -->
+            <section class="lg:col-span-3 mb-8">
+                <h2 class="text-3xl sm:text-4xl font-display font-bold text-text-light mb-8 text-center">II. Review Plan for Topic Extraction Methods</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6 card-hover-scale">
+                        <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">1. Method Overview and Baseline Capability Assessment</h3>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6">Review the overall framework, core algorithms, and main modules.</li>
+                            <li class="relative pl-6">Assess baseline performance (accuracy, recall) for "direct discussion" content.</li>
+                            <li class="relative pl-6">Clarify reliance on semantic and contextual understanding.</li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 card-hover-scale">
+                        <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">2. Irony Identification Mechanism Review</h3>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6">Check for explicit irony detection modules and principles.</li>
+                            <li class="relative pl-6">Review features used (word embeddings, sentiment reversal).</li>
+                            <li class="relative pl-6">Evaluate context dependency (sentence, document level).</li>
+                            <li class="relative pl-6">Discuss challenges with subtle irony and metaphors.</li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 card-hover-scale">
+                        <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">3. Metaphor Identification Mechanism Review</h3>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6">How non-literal meaning is detected (semantic distance, conceptual conflict).</li>
+                            <li class="relative pl-6">Ability to map metaphorical expressions to deep themes.</li>
+                            <li class="relative pl-6">Use of semantic networks, concept graphs, word vector models.</li>
+                            <li class="relative pl-6">Capability to distinguish idiomatic vs. novel metaphors.</li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 card-hover-scale">
+                        <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">4. Misleading Information Identification Mechanism Review</h3>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6">Mechanisms for evaluating source credibility, content consistency.</li>
+                            <li class="relative pl-6">Identification of linguistic features (exaggeration, one-sidedness).</li>
+                            <li class="relative pl-6">Relevance to topic adjustment/filtering, not full fact-checking.</li>
+                            <li class="relative pl-6">Robustness against subtle misleading info.</li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 card-hover-scale">
+                        <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">5. Overall Precision and Robustness Improvement Strategies Review</h3>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6">Training data and validation with annotations.</li>
+                            <li class="relative pl-6">Utilization of broader contexts and cross-text analysis.</li>
+                            <li class="relative pl-6">Detailed error analysis and specific improvement plans.</li>
+                            <li class="relative pl-6">Integration of multi-dimensional linguistic features.</li>
+                            <li class="relative pl-6">Appropriateness of evaluation metrics.</li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 card-hover-scale">
+                        <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">6. Recommendations and Improvement Directions</h3>
+                        <p class="text-text-muted text-sm">Propose targeted technical improvements to enhance the method's ability to identify and distinguish direct discussions, irony, metaphors, and misleading information, thereby significantly improving topic extraction precision and robustness.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section III: Guidelines for Deep Analysis (Full width, nested structure) -->
+            <section class="card p-8 lg:col-span-3 mb-8">
+                <h2 class="text-3xl sm:text-4xl font-display font-bold text-text-light mb-6">III. Guidelines for Deep Analysis of "American Red Line" Discussions</h2>
+                <p class="text-lg text-text-muted mb-4 leading-relaxed">
+                    <strong class="text-accent-blue">Objective:</strong> The analysis team must go beyond surface-level topic identification to deeply mine underlying narratives, emotional drivers, and specific perspectives of different discussion groups (official media, self-media, general netizens) related to "American Red Line" for deeper insights.
+                </p>
+                <h3 class="text-2xl font-display font-semibold text-text-light mb-4 mt-6">Analysis Requirements:</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Identifying Underlying Narratives -->
+                    <div class="card p-6 card-hover-scale">
+                        <h4 class="text-xl font-display font-semibold text-accent-blue mb-3">1. Identifying Underlying Narratives</h4>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6"><strong class="text-text-light">Beyond Fact Listing:</strong> Analyze "stories" and "frames" supporting public understanding.</li>
+                            <li class="relative pl-6"><strong class="text-text-light">Core Themes and Symbolic Meaning:</strong> Identify recurring themes, symbols, and metaphors.</li>
+                            <li class="relative pl-6"><strong class="text-text-light">Narrative Evolution and Conflict:</strong> Track how narratives evolve, compete, or merge over time.</li>
+                        </ul>
+                    </div>
+                    <!-- Analyzing Emotional Drivers -->
+                    <div class="card p-6 card-hover-scale">
+                        <h4 class="text-xl font-display font-semibold text-accent-blue mb-3">2. Analyzing Emotional Drivers</h4>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6"><strong class="text-text-light">Emotional Spectrum and Intensity:</strong> Identify core emotions (anger, fear, patriotism) and their spread.</li>
+                            <li class="relative pl-6"><strong class="text-text-light">Methods of Emotional Expression:</strong> Analyze language, imagery, videos, emojis, memes.</li>
+                            <li class="relative pl-6"><strong class="text-text-light">Emotional Triggers:</strong> Investigate events, info, statements that trigger strong responses.</li>
+                        </ul>
+                    </div>
+                    <!-- Dissecting Specific Perspectives -->
+                    <div class="card p-6 card-hover-scale">
+                        <h4 class="text-xl font-display font-semibold text-accent-blue mb-3">3. Dissecting Specific Perspectives of Discussion Groups</h4>
+                        <div class="space-y-4 mt-2">
+                            <div class="text-text-muted text-sm">
+                                <strong class="text-text-light text-base">Official Media:</strong> Analyze main melody, stance, propaganda focus, and agenda setting.
+                            </div>
+                            <div class="text-text-muted text-sm">
+                                <strong class="text-text-light text-base">Self-media:</strong> Identify diverse voices, dissemination strategies, and interaction with official narratives.
+                            </div>
+                            <div class="text-text-muted text-sm">
+                                <strong class="text-text-light text-base">General Netizens:</strong> Summarize collective emotion, subcultures, echo chambers, and behavioral expression.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-lg text-text-muted mt-8 leading-relaxed">
+                    <strong class="text-accent-blue">Output Requirements:</strong> The analysis report must clearly articulate findings across these three dimensions, providing comprehensive deep insights rather than mere data listings or surface descriptions. It should highlight key insights, point out potential risks, opportunities, or future trends, and offer more comprehensive, in-depth background information for strategic decision-making.
+                </p>
+            </section>
+
+            <!-- Section IV: Mechanism for Identifying Key Influencers, Propagation Paths, and Potential Coordinated Behavior (Flow-like structure) -->
+            <section class="card p-8 lg:col-span-3 mb-8">
+                <h2 class="text-3xl sm:text-4xl font-display font-bold text-text-light mb-8 text-center">IV. Mechanism for Identifying Key Influencers, Propagation Paths, and Coordinated Behavior</h2>
+
+                <div class="relative space-y-12">
+                    <!-- Step 1: Data Acquisition -->
+                    <div class="flex items-start md:space-x-8 flex-col md:flex-row group">
+                        <div class="flex-shrink-0 w-full md:w-1/3 p-4 card rounded-lg shadow-xl bg-gradient-to-br from-bg-card to-transparent border-t-2 border-l-2 border-accent-blue group-hover:border-accent-purple transition-all duration-300 flow-step-mobile-card">
+                            <h3 class="text-2xl font-display font-semibold text-accent-blue mb-2">1. Data Acquisition & Preprocessing</h3>
+                            <p class="text-text-muted text-sm">Define sources, keywords, time range, data types, then clean and standardize the data.</p>
+                        </div>
+                        <div class="relative flex-grow mt-4 md:mt-0 md:w-2/3 flow-step-mobile-text">
+                            <div class="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-blue to-accent-purple rounded-full md:hidden"></div>
+                            <ul class="space-y-3 text-text-light text-sm pl-4 md:pl-0 list-none list-glow">
+                                <li class="relative pl-6"><strong class="text-text-light">Data Source Determination:</strong> Social Media (Weibo, WeChat, Zhihu, Douyin), News Media, Forums.</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Keywords:</strong> "美国斩杀线", "红线", variants, related figures/events. Multilingual search.</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Data Cleaning:</strong> Remove duplicates, standardize formats, text preprocessing (tokenization, BERT embeddings).</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Arrow separator for visual flow -->
+                    <div class="flex justify-center py-4 flow-step-arrow">
+                        <div class="w-10 h-10 rounded-full bg-accent-blue flex items-center justify-center text-text-light text-xl font-bold animate-pulse-slow">
+                            &#8595;
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Key Influencer Identification -->
+                    <div class="flex items-start md:space-x-8 flex-col md:flex-row group">
+                        <div class="flex-shrink-0 w-full md:w-1/3 p-4 card rounded-lg shadow-xl bg-gradient-to-br from-bg-card to-transparent border-t-2 border-l-2 border-accent-blue group-hover:border-accent-purple transition-all duration-300 flow-step-mobile-card">
+                            <h3 class="text-2xl font-display font-semibold text-accent-blue mb-2">2. Key Influencer Identification Module</h3>
+                            <p class="text-text-muted text-sm">Identify influential users based on network centrality, activity, and content strategy.</p>
+                        </div>
+                        <div class="relative flex-grow mt-4 md:mt-0 md:w-2/3 flow-step-mobile-text">
+                            <div class="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-blue to-accent-purple rounded-full md:hidden"></div>
+                            <ul class="space-y-3 text-text-light text-sm pl-4 md:pl-0 list-none list-glow">
+                                <li class="relative pl-6"><strong class="text-text-light">Network Centrality:</strong> Degree, Betweenness, Closeness, Eigenvector Centrality (PageRank).</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Activity & Interaction:</strong> Content generation, interaction volume, audience size, originality.</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Content Strategy:</strong> Topic initiator, emotion instigator, information aggregator.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex justify-center py-4 flow-step-arrow">
+                        <div class="w-10 h-10 rounded-full bg-accent-blue flex items-center justify-center text-text-light text-xl font-bold animate-pulse-slow">
+                            &#8595;
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Propagation Path Identification -->
+                    <div class="flex items-start md:space-x-8 flex-col md:flex-row group">
+                        <div class="flex-shrink-0 w-full md:w-1/3 p-4 card rounded-lg shadow-xl bg-gradient-to-br from-bg-card to-transparent border-t-2 border-l-2 border-accent-blue group-hover:border-accent-purple transition-all duration-300 flow-step-mobile-card">
+                            <h3 class="text-2xl font-display font-semibold text-accent-blue mb-2">3. Propagation Path Identification Module</h3>
+                            <p class="text-text-muted text-sm">Track how information spreads through time series and content similarity analysis.</p>
+                        </div>
+                        <div class="relative flex-grow mt-4 md:mt-0 md:w-2/3 flow-step-mobile-text">
+                            <div class="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-blue to-accent-purple rounded-full md:hidden"></div>
+                            <ul class="space-y-3 text-text-light text-sm pl-4 md:pl-0 list-none list-glow">
+                                <li class="relative pl-6"><strong class="text-text-light">Time Series Analysis:</strong> Event timelines, repost/comment/mention chains.</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Content Similarity:</strong> NLP techniques (cosine, Jaccard, BERT) for text duplication.</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Visualization:</strong> Dynamic network graphs, timeline graphs.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex justify-center py-4 flow-step-arrow">
+                        <div class="w-10 h-10 rounded-full bg-accent-blue flex items-center justify-center text-text-light text-xl font-bold animate-pulse-slow">
+                            &#8595;
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Coordinated Behavior Detection -->
+                    <div class="flex items-start md:space-x-8 flex-col md:flex-row group">
+                        <div class="flex-shrink-0 w-full md:w-1/3 p-4 card rounded-lg shadow-xl bg-gradient-to-br from-bg-card to-transparent border-t-2 border-l-2 border-accent-blue group-hover:border-accent-purple transition-all duration-300 flow-step-mobile-card">
+                            <h3 class="text-2xl font-display font-semibold text-accent-blue mb-2">4. Potential Coordinated Behavior Detection Module</h3>
+                            <p class="text-text-muted text-sm">Detect synchronized activities, content duplication, and account anomalies.</p>
+                        </div>
+                        <div class="relative flex-grow mt-4 md:mt-0 md:w-2/3 flow-step-mobile-text">
+                            <div class="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-blue to-accent-purple rounded-full md:hidden"></div>
+                            <ul class="space-y-3 text-text-light text-sm pl-4 md:pl-0 list-none list-glow">
+                                <li class="relative pl-6"><strong class="text-text-light">Temporal Synchronicity:</strong> Burst detection, posting timestamp clustering.</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Content Synchronicity:</strong> Text duplication, narrative consistency, keyword co-occurrence.</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Account Anomalies:</strong> New registrations, patterned names, "bot mutual promotion."</li>
+                                <li class="relative pl-6"><strong class="text-text-light">ML/AI Models:</strong> Classifiers (Random Forest), Anomaly Detection (DBSCAN).</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex justify-center py-4 flow-step-arrow">
+                        <div class="w-10 h-10 rounded-full bg-accent-blue flex items-center justify-center text-text-light text-xl font-bold animate-pulse-slow">
+                            &#8595;
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Visualization and Reporting -->
+                    <div class="flex items-start md:space-x-8 flex-col md:flex-row group">
+                        <div class="flex-shrink-0 w-full md:w-1/3 p-4 card rounded-lg shadow-xl bg-gradient-to-br from-bg-card to-transparent border-t-2 border-l-2 border-accent-blue group-hover:border-accent-purple transition-all duration-300 flow-step-mobile-card">
+                            <h3 class="text-2xl font-display font-semibold text-accent-blue mb-2">5. Visualization & Reporting</h3>
+                            <p class="text-text-muted text-sm">Present findings through network graphs, timelines, and detailed reports.</p>
+                        </div>
+                        <div class="relative flex-grow mt-4 md:mt-0 md:w-2/3 flow-step-mobile-text">
+                            <div class="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-blue to-accent-purple rounded-full md:hidden"></div>
+                            <ul class="space-y-3 text-text-light text-sm pl-4 md:pl-0 list-none list-glow">
+                                <li class="relative pl-6"><strong class="text-text-light">Output Formats:</strong> Network Graphs, Timelines, Heatmaps, Word Clouds.</li>
+                                <li class="relative pl-6"><strong class="text-text-light">Detailed Reports:</strong> Lists of influencers, propagation paths, evidence of coordinated behavior.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-lg text-text-muted mt-8 leading-relaxed text-center">
+                    This integrated mechanism provides a comprehensive and actionable system for deeply understanding the information diffusion process and potential social engineering impacts of the "American Red Line" topic.
+                </p>
+            </section>
+
+            <!-- Section V: Chinese Netizen Perception (Interconnected cards) -->
+            <section class="card p-8 lg:col-span-3 mb-8">
+                <h2 class="text-3xl sm:text-4xl font-display font-bold text-text-light mb-8 text-center">V. Chinese Netizen Perception of Socio-Economic Issues as an Interconnected "Red Line" Framework</h2>
+                <p class="text-lg text-text-muted mb-6 leading-relaxed">
+                    Chinese netizens perceive medical debt, unemployment, and housing costs not as isolated socio-economic issues, but as a tightly interconnected "red line" framework. The core idea is that the worsening of any one problem can rapidly transmit to others, ultimately pushing individuals or families into an irreversible predicament – the "red line."
+                </p>
+
+                <h3 class="text-2xl font-display font-semibold text-text-light mb-6">1. Intrinsic Connectivity and Interdependence Mechanism:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                    <!-- Connector Lines (Visual only, illustrative) for desktop, hidden on mobile) -->
+                    <div class="absolute inset-0 hidden md:flex items-center justify-center pointer-events-none z-0">
+                        <div class="w-[30%] h-0 border-t-2 border-dashed border-accent-purple absolute top-1/4 left-1/4 -translate-x-1/2 -rotate-[15deg]"></div>
+                        <div class="w-[30%] h-0 border-t-2 border-dashed border-accent-purple absolute top-3/4 left-1/4 -translate-x-1/2 rotate-[15deg]"></div>
+
+                        <div class="w-[30%] h-0 border-t-2 border-dashed border-accent-purple absolute top-1/4 right-1/4 translate-x-1/2 rotate-[15deg]"></div>
+                        <div class="w-[30%] h-0 border-t-2 border-dashed border-accent-purple absolute top-3/4 right-1/4 translate-x-1/2 -rotate-[15deg]"></div>
+                        
+                        <div class="h-[50%] w-0 border-l-2 border-dashed border-accent-purple absolute left-1/2 -translate-x-1/2 top-1/4"></div>
+                    </div>
+
+                    <!-- Housing Card -->
+                    <div class="card p-6 card-hover-scale relative z-10">
+                        <h4 class="text-xl font-display font-semibold text-accent-blue mb-3">Housing Costs (High Housing Prices/Rent) as a Long-Term Squeeze Foundation</h4>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6"><strong class="text-text-light">Impact on Medical Debt:</strong> Squeezes disposable income, reduces savings, leads to delayed check-ups.</li>
+                            <li class="relative pl-6"><strong class="text-text-light">Transmission to Unemployment:</strong> Increases pressure in cities, leads to "flexible employment" or "lying flat," hinders job creation.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Unemployment Card -->
+                    <div class="card p-6 card-hover-scale relative z-10">
+                        <h4 class="text-xl font-display font-semibold text-accent-blue mb-3">Unemployment (or Job Instability) as the Core Shock Point</h4>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6"><strong class="text-text-light">Impact on Housing Costs:</strong> Cuts off income, leads to inability to pay mortgages/rent, risk of foreclosure.</li>
+                            <li class="relative pl-6"><strong class="text-text-light">Impact on Medical Debt:</strong> Insurance interruption, lower reimbursement rates, heavy burden of treatment.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Medical Debt Card -->
+                    <div class="card p-6 card-hover-scale relative z-10">
+                        <h4 class="text-xl font-display font-semibold text-accent-blue mb-3">Medical Debt as the Final Trigger for Collapse</h4>
+                        <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                            <li class="relative pl-6"><strong class="text-text-light">Impact on Housing Costs:</strong> Depletes savings, forces sale of property, leads to financial ruin.</li>
+                            <li class="relative pl-6"><strong class="text-text-light">Transmission to Unemployment:</strong> Chronic illness reduces work capacity, affects employability and performance.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-display font-semibold text-text-light mb-6 mt-12">2. Composition of the "Red Line" Framework and Netizen Cognition:</h3>
+                <ul class="space-y-4 text-text-light list-none pl-0 list-glow">
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Cumulative Effect and Vulnerability:</strong> Families' economic resilience is fragile under housing costs; unemployment depletes reserves; major illness is the final straw.
+                    </li>
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Irreversible Downward Spiral:</strong> "Once fallen, it's hard to get back up." Unemployment leads to inability to pay for housing/medical, affecting employability.
+                    </li>
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">Lack of Security and Systemic Risk:</strong> Widespread anxiety that hard work isn't enough; existing social security is insufficient.
+                    </li>
+                    <li class="relative pl-6">
+                        <strong class="text-accent-blue">From Individual to Collective:</strong> Issues are collective challenges; shared experiences construct this "red line" understanding.
+                    </li>
+                </ul>
+                <p class="text-lg text-text-muted mt-6 leading-relaxed">
+                    Therefore, netizens' perception of medical debt, unemployment, and housing costs is a holistic perspective that tightly links individual survival predicaments with macro socio-economic structures. Addressing only one issue in isolation, without considering its transmission and cumulative effects within the "red line" framework, will be superficial. The report must clearly analyze Chinese social media users' specific interpretations of US socio-economic issues and their comparative perspectives with China's own social problems to accurately reflect cross-cultural perceptual differences.
+                </p>
+            </section>
+
+            <!-- Section VI: Time Series Analysis Framework (Stepper/Timeline like) -->
+            <section class="card p-8 lg:col-span-3 mb-8">
+                <h2 class="text-3xl sm:text-4xl font-display font-bold text-text-light mb-8 text-center">VI. Time Series Analysis Framework: Tracking "American Red Line" Topics and Narrative Dynamics</h2>
+
+                <div class="space-y-10 relative after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 after:bg-gradient-to-b after:from-accent-blue after:to-accent-purple after:rounded-full after:-translate-x-1/2 timeline-container hidden md:block">
+                    <!-- Step 1 -->
+                    <div class="relative flex items-center justify-between md:odd:flex-row-reverse group">
+                        <div class="w-full md:w-5/12 card p-6 card-hover-scale relative z-10">
+                            <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">I. Objective Definition</h3>
+                            <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                                <li class="relative pl-6">Track changes in topics (geopolitics, military, diplomacy).</li>
+                                <li class="relative pl-6">Quantify heat, attention, dissemination trends.</li>
+                                <li class="relative pl-6">Identify emerging focal points, narrative shifts.</li>
+                                <li class="relative pl-6">Reveal dynamic evolution of attitudes.</li>
+                            </ul>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-accent-purple flex items-center justify-center text-text-light font-bold ring-4 ring-bg-dark z-20 group-hover:scale-110 transition-transform duration-300">1</div>
+                        <div class="w-full md:w-5/12"></div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="relative flex items-center justify-between md:odd:flex-row-reverse group">
+                        <div class="w-full md:w-5/12"></div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-accent-blue flex items-center justify-center text-text-light font-bold ring-4 ring-bg-dark z-20 group-hover:scale-110 transition-transform duration-300">2</div>
+                        <div class="w-full md:w-5/12 card p-6 card-hover-scale relative z-10">
+                            <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">II. Data Acquisition</h3>
+                            <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                                <li class="relative pl-6"><strong>Sources:</strong> Social Media (Twitter, Weibo, Reddit), News Media, Forums, Search Engine Trends.</li>
+                                <li class="relative pl-6"><strong>Keywords:</strong> "美国斩杀线", "红线", specific regions/events (multilingual).</li>
+                                <li class="relative pl-6"><strong>Data Format:</strong> Text, time, source, author, interaction data.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="relative flex items-center justify-between md:odd:flex-row-reverse group">
+                        <div class="w-full md:w-5/12 card p-6 card-hover-scale relative z-10">
+                            <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">III. Data Preprocessing</h3>
+                            <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                                <li class="relative pl-6">Data Cleaning (duplicates, ads, low-quality content).</li>
+                                <li class="relative pl-6">Text Standardization (encoding, HTML tags).</li>
+                                <li class="relative pl-6">Tokenization, Lemmatization, Stop-word Filtering.</li>
+                                <li class="relative pl-6">NER and Language Detection.</li>
+                            </ul>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-accent-purple flex items-center justify-center text-text-light font-bold ring-4 ring-bg-dark z-20 group-hover:scale-110 transition-transform duration-300">3</div>
+                        <div class="w-full md:w-5/12"></div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="relative flex items-center justify-between md:odd:flex-row-reverse group">
+                        <div class="w-full md:w-5/12"></div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-accent-blue flex items-center justify-center text-text-light font-bold ring-4 ring-bg-dark z-20 group-hover:scale-110 transition-transform duration-300">4</div>
+                        <div class="w-full md:w-5/12 card p-6 card-hover-scale relative z-10">
+                            <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">IV. Feature Engineering & Metric Construction</h3>
+                            <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                                <li class="relative pl-6">Time Series Construction (day, week, month).</li>
+                                <li class="relative pl-6">Heat Metrics (content volume, interaction, search index).</li>
+                                <li class="relative pl-6">Topic Modeling (LDA, BERT-based).</li>
+                                <li class="relative pl-6">Sentiment Analysis, Keyword/Phrase Extraction, NER.</li>
+                                <li class="relative pl-6">Narrative Identification & Tracking.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="relative flex items-center justify-between md:odd:flex-row-reverse group">
+                        <div class="w-full md:w-5/12 card p-6 card-hover-scale relative z-10">
+                            <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">V. Time Series Modeling & Analysis</h3>
+                            <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                                <li class="relative pl-6">Trend & Seasonality (STL, LOESS).</li>
+                                <li class="relative pl-6">Anomaly Detection (ARIMA, Prophet, Isolation Forest).</li>
+                                <li class="relative pl-6">Event Correlation Analysis.</li>
+                                <li class="relative pl-6">Topic & Narrative Evolution (Dynamic LDA).</li>
+                                <li class="relative pl-6">Correlation Analysis (topics, sentiments, data sources).</li>
+                            </ul>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-accent-purple flex items-center justify-center text-text-light font-bold ring-4 ring-bg-dark z-20 group-hover:scale-110 transition-transform duration-300">5</div>
+                        <div class="w-full md:w-5/12"></div>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div class="relative flex items-center justify-between md:odd:flex-row-reverse group">
+                        <div class="w-full md:w-5/12"></div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-accent-blue flex items-center justify-center text-text-light font-bold ring-4 ring-bg-dark z-20 group-hover:scale-110 transition-transform duration-300">6</div>
+                        <div class="w-full md:w-5/12 card p-6 card-hover-scale relative z-10">
+                            <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">VI. Visualization & Insights</h3>
+                            <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                                <li class="relative pl-6">Dynamic Dashboards, Timeline Graphs.</li>
+                                <li class="relative pl-6">Theme River/Streamgraph, Word Clouds.</li>
+                                <li class="relative pl-6">Sentiment Polarity Distribution, Network Graphs.</li>
+                                <li class="relative pl-6">Event-Trend Correlation Graphs.</li>
+                                <li class="relative pl-6">Regular analysis reports with deep interpretations.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Step 7 -->
+                    <div class="relative flex items-center justify-between md:odd:flex-row-reverse group">
+                        <div class="w-full md:w-5/12 card p-6 card-hover-scale relative z-10">
+                            <h3 class="text-xl font-display font-semibold text-accent-blue mb-3">VII. Iteration & Optimization</h3>
+                            <ul class="space-y-2 text-text-muted text-sm list-none pl-0 list-glow">
+                                <li class="relative pl-6">Model Evaluation & Tuning.</li>
+                                <li class="relative pl-6">New Data Source Integration.</li>
+                                <li class="relative pl-6">Keyword Library Updates.</li>
+                                <li class="relative pl-6">Domain Expert Feedback.</li>
+                            </ul>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-accent-purple flex items-center justify-center text-text-light font-bold ring-4 ring-bg-dark z-20 group-hover:scale-110 transition-transform duration-300">7</div>
+                        <div class="w-full md:w-5/12"></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</body>
+</html>
