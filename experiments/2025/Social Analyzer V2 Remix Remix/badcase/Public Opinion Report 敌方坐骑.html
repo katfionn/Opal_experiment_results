@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Opinion Report: 敌方坐骑 (Enemy's Mount)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-bg': 'hsl(240, 15%, 8%)',
+                        'secondary-bg': 'hsl(240, 15%, 12%)',
+                        'card-bg': 'hsl(240, 15%, 15%)',
+                        'text-light': 'hsl(220, 20%, 90%)',
+                        'text-muted': 'hsl(220, 10%, 60%)',
+                        'accent-1': 'hsl(280, 80%, 65%)', // Vibrant magenta/purple
+                        'accent-2': 'hsl(200, 90%, 60%)', // Electric blue
+                        'border-light': 'hsl(240, 10%, 25%)',
+                    },
+                    fontFamily: {
+                        display: ['Outfit', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, hsl(240, 15%, 8%) 0%, hsl(260, 20%, 12%) 100%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            color: hsl(220, 20%, 90%);
+            line-height: 1.6;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, var(--tw-colors-accent-1) 0%, var(--tw-colors-accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background-color: rgba(45, 30, 60, 0.2); /* Semi-transparent background */
+            backdrop-filter: blur(10px); /* Apply blur */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); /* Soft shadow */
+        }
+        
+        details > summary {
+            list-style: none; /* Remove default marker */
+            cursor: pointer;
+            position: relative;
+            padding-left: 2rem; /* Space for custom arrow */
+            transition: color 0.3s ease;
+        }
+
+        details > summary:hover {
+            color: var(--tw-colors-accent-1);
+        }
+
+        details > summary::before {
+            content: '+';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        details[open] > summary::before {
+            content: '-';
+            transform: translateY(-50%);
+        }
+
+        details[open] > summary {
+            margin-bottom: 0.75rem; /* Add space below open summary */
+        }
+
+        details > div {
+            padding-left: 2rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive grid for characteristics */
+        .characteristics-grid {
+            grid-template-columns: 1fr; /* Default to single column on small screens */
+        }
+        @media (min-width: 768px) {
+            .characteristics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+        
+        /* Subtle glow effect for section titles */
+        .glow-text {
+            text-shadow: 0 0 8px hsla(280, 80%, 65%, 0.5), 0 0 16px hsla(200, 90%, 60%, 0.3);
+        }
+    </style>
+</head>
+<body class="font-body text-text-light antialiased">
+    <div class="min-h-screen flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <header class="text-center mb-12 max-w-4xl mx-auto">
+            <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight mb-4 gradient-text glow-text">
+                Public Opinion Report
+            </h1>
+            <p class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-text-light mb-6">
+                '敌方坐骑' (Enemy's Mount) Meme Analysis
+            </p>
+            <p class="text-lg sm:text-xl text-text-muted max-w-2xl mx-auto">
+                An in-depth look into the captivating internet meme expressing ironic admiration for a rival's possessions or style.
+            </p>
+        </header>
+
+        <!-- Navigation (Table of Contents) -->
+        <nav class="sticky top-0 z-10 w-full max-w-5xl mx-auto mb-12 p-4 rounded-xl glass-card flex flex-wrap justify-center gap-4 transition-all duration-300 ease-in-out">
+            <a href="#origin" class="text-text-light hover:text-accent-1 font-medium text-lg px-4 py-2 rounded-lg transition-all duration-200 hover:bg-card-bg">
+                I. Origin
+            </a>
+            <a href="#characteristics" class="text-text-light hover:text-accent-1 font-medium text-lg px-4 py-2 rounded-lg transition-all duration-200 hover:bg-card-bg">
+                II. Characteristics
+            </a>
+            <a href="#applications" class="text-text-light hover:text-accent-1 font-medium text-lg px-4 py-2 rounded-lg transition-all duration-200 hover:bg-card-bg">
+                III. Applications
+            </a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="w-full max-w-5xl mx-auto space-y-12">
+            <!-- Introduction -->
+            <section class="p-8 rounded-xl glass-card transition-all duration-300 hover:shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 gradient-text">Introduction</h2>
+                <p class="text-lg leading-relaxed">
+                    The '敌方坐骑' (Enemy's Mount) internet meme captures the phenomenon of finding an aesthetic, character, item, or concept belonging to an opposing faction or rival entity surprisingly, or even ironically, appealing and desirable. At its core, it expresses a humorous acknowledgment of an antagonist's superior style or possessions, despite ideological or competitive alignment.
+                </p>
+            </section>
+
+            <!-- Section I: Origin and Conceptual Evolution -->
+            <section id="origin" class="p-8 rounded-xl glass-card transition-all duration-300 hover:shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 gradient-text">
+                    <span class="text-accent-1">I.</span> Origin and Conceptual Evolution
+                </h2>
+
+                <div class="space-y-6">
+                    <p class="text-lg">
+                        The meme is widely understood to have emerged from <strong class="text-accent-2">Massively Multiplayer Online Role-Playing Games (MMORPGs)</strong> like <em>World of Warcraft</em>. Players, committed to one of two major factions, frequently observed and admired the unique mounts of the opposing faction. These mounts were often perceived as having cooler designs or greater rarity, intensifying the desire for items that were exclusive and unobtainable.
+                    </p>
+
+                    <details class="group p-4 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300">
+                        <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                            From Literal to Figurative
+                        </summary>
+                        <div class="mt-4 text-text-muted">
+                            <p class="mb-4">
+                                While retaining its gaming roots, the meme transcended a literal desire for an in-game item to become a broader metaphorical expression. The "enemy" aspect expanded to represent any rival, competitor, opposing group, or even an inaccessible ideal, not necessarily implying malice.
+                            </p>
+                            <p>
+                                The "mount/desirable object" aspect also expanded beyond literal mounts to encompass any attractive attribute, possession, or characteristic, such as character designs, items' visual appeal, skills, pets, or non-tangible concepts. This evolution highlights an ironic appreciation for something deemed "off-limits" or belonging to the "other side," often stemming from an internal conflict of admiration versus affiliation.
+                            </p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- Section II: Characteristics and Widespread Adoption -->
+            <section id="characteristics" class="p-8 rounded-xl glass-card transition-all duration-300 hover:shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 gradient-text">
+                    <span class="text-accent-1">II.</span> Characteristics and Widespread Adoption
+                </h2>
+                <p class="text-lg mb-8">
+                    The '敌方坐骑' meme demonstrates a strong presence, rapid understanding, humor, vivid imagery, and widespread adoption on the Chinese internet due to several key characteristics:
+                </p>
+
+                <div class="grid characteristics-grid gap-6">
+                    <div class="p-6 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300 shadow-md">
+                        <details class="group">
+                            <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                                Universal Relatability and Strong Presence
+                            </summary>
+                            <div class="mt-4 text-text-muted">
+                                <p class="mb-2">It taps into the common human experience of desiring what is inaccessible or belonging to an "other," resonating across diverse user demographics, from gamers to individuals in everyday life.</p>
+                                <p>Its conciseness, impact, and versatility make it easy to apply to a vast array of scenarios, from in-game items to technological glitches or personal longings.</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="p-6 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300 shadow-md">
+                        <details class="group">
+                            <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                                Rapid Understanding ('秒懂')
+                            </summary>
+                            <div class="mt-4 text-text-muted">
+                                <p class="mb-2">The meme relies on the immediate ironic contrast between "mount" (implying aid, speed, and loyalty) and "enemy's" (implying sabotage, hindrance, and opposition).</p>
+                                <p>This inherent contradiction is instantly grasped, drawing from familiar gaming tropes and emotional accessibility regarding the perceived "superiority" of the other side.</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="p-6 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300 shadow-md">
+                        <details class="group">
+                            <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                                Humor ('有梗')
+                            </summary>
+                            <div class="mt-4 text-text-muted">
+                                <p class="mb-2">The core humor stems from the ironic subversion of expectations—admiring something from a rival or encountering a desirable object that is ironically out of reach.</p>
+                                <p>This often involves situational irony, anthropomorphism (attributing appeal to inanimate objects or uncontrollable circumstances), and self-deprecating exaggeration of minor inconveniences or desires into a grand struggle.</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="p-6 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300 shadow-md">
+                        <details class="group">
+                            <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                                Vivid Imagery ('画面感')
+                            </summary>
+                            <div class="mt-4 text-text-muted">
+                                <p class="mb-2">The term 'mount' immediately conjures visual analogies of desirable vehicles or creatures.</p>
+                                <p>Adding 'enemy's' paints a clear mental picture of something appealing yet uncooperative or out of reach, easily relating to real-life "fail" videos, amusing struggles with equipment, or aesthetic appreciation of rival designs.</p>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="p-6 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300 shadow-md">
+                        <details class="group">
+                            <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                                Adaptability and Longevity
+                            </summary>
+                            <div class="mt-4 text-text-muted">
+                                <p class="mb-2">Its abstract and flexible nature allows for continuous reinterpretation and application to new scenarios, ensuring its relevance and shareability across various online platforms (Weibo, WeChat, Douyin, gaming forums, Bilibili).</p>
+                                <p>It frequently serves as an ideal caption for images or short videos depicting appealing rival elements or humorous struggles.</p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section III: Contextual Applications -->
+            <section id="applications" class="p-8 rounded-xl glass-card transition-all duration-300 hover:shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 gradient-text">
+                    <span class="text-accent-1">III.</span> Contextual Applications
+                </h2>
+                <p class="text-lg mb-8">
+                    The meme's versatility allows for its manifestation across various contexts:
+                </p>
+
+                <div class="space-y-6">
+                    <details class="group p-4 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300">
+                        <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                            Gaming Communities
+                        </summary>
+                        <div class="mt-4 text-text-muted">
+                            <p class="mb-2">This is the most direct application. Players express a desire for mounts, armor sets, weapon designs, or even character races exclusive to opposing factions in MMORPGs, MOBAs, FPS, or strategy games.</p>
+                            <p>It acknowledges superior artistic design or gameplay mechanics attributed to a rival in-game entity.</p>
+                        </div>
+                    </details>
+
+                    <details class="group p-4 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300">
+                        <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                            Pop Culture and Fandoms
+                        </summary>
+                        <div class="mt-4 text-text-muted">
+                            <p class="mb-2">Applied when fans find themselves drawn to antagonists, anti-heroes, or characters from rival groups within narrative media (anime, manga, TV shows, movies) due to their compelling design, unique powers, or perceived "cooler" aesthetic.</p>
+                            <p>It extends to "guilty pleasure" appreciation for genres, artists, or styles typically associated with a "rival" subculture.</p>
+                        </div>
+                    </details>
+
+                    <details class="group p-4 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300">
+                        <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                            Everyday and Personal Contexts
+                        </summary>
+                        <div class="mt-4 text-text-muted">
+                            <p class="mb-2">Used humorously to describe a personal longing for a tangible item owned by a competitor, friend, or stranger (e.g., a neighbor's car or a rival company's product).</p>
+                            <p>In non-serious settings like sports or academics, it can describe a grudging admiration for a rival's skill, possession, or attractive quality, often implying lighthearted jealousy or appreciation for something out of one's immediate reach.</p>
+                        </div>
+                    </details>
+
+                    <details class="group p-4 rounded-lg bg-card-bg hover:bg-secondary-bg transition-colors duration-300">
+                        <summary class="font-semibold text-xl text-text-light group-hover:text-accent-1 transition-colors duration-300">
+                            Broader Social Commentary (Limited)
+                        </summary>
+                        <div class="mt-4 text-text-muted">
+                            <p class="mb-2">While less direct, the meme can subtly highlight biases or factionalism by humorously pointing out that appealing qualities are not exclusive to one's "side."</p>
+                            <p>It can serve as a mild critique of tribalism, suggesting that good design or attractive qualities can transcend arbitrary divisions.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
