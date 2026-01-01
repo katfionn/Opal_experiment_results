@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>户晨风分析报告 - 综合洞察</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for transitions and base styles */
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out, opacity 0.4s ease-out;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .collapsible-content.active {
+            max-height: 500px; /* Adjust based on expected content height, ensures smooth transition */
+            opacity: 1;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .collapsible-button .arrow {
+            transition: transform 0.3s ease;
+        }
+        .collapsible-button[aria-expanded="true"] .arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Glassmorphism effect */
+        .glassmorphism {
+            background-color: rgba(30, 41, 59, 0.6); /* Slightly darker for better contrast on dark theme */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(71, 85, 105, 0.3); /* Subtle, lighter border */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Scrollbar styling for a premium feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0F172A; /* primary-bg dark */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4A5568; /* a subtle gray-blue */
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748B; /* a lighter gray-blue on hover */
+        }
+
+        /* Force fonts for readability */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Outfit', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-bg': '#0F172A', /* Dark Blue-Gray */
+                        'card-bg': 'rgba(30, 41, 59, 0.6)', /* Darker, slightly transparent for glass */
+                        'accent-1': '#6EE7B7', /* Vibrant Teal Green for primary highlights */
+                        'accent-2': '#A78BFA', /* Soft Lavender Purple for secondary highlights/buttons */
+                        'text-light': '#E2E8F0', /* Light Blue-Gray for main text */
+                        'text-muted': '#94A3B8', /* Muted Blue-Gray for secondary text */
+                        'border-color': 'rgba(71, 85, 105, 0.3)', /* Muted border for glass */
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-primary-bg to-zinc-900 text-text-light font-body min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header Section -->
+        <header class="text-center mb-12 py-8 glassmorphism rounded-3xl border-border-color border">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-accent-1 leading-tight mb-4 animate-fade-in">
+                户晨风分析报告
+            </h1>
+            <p class="text-lg sm:text-xl text-text-muted max-w-3xl mx-auto px-4">
+                一份关于网络UP主“户晨风”公众影响力、争议事件及相关社会反响的综合性报告。
+            </p>
+            <div class="mt-6 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="#huchenfeng-report" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-primary-bg bg-accent-1 hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-1 transition-all duration-300 transform hover:-translate-y-1">
+                    查看户晨风专题
+                </a>
+                <a href="#comprehensive-report" class="inline-flex items-center justify-center px-6 py-3 border border-accent-2 text-base font-medium rounded-full shadow-sm text-accent-2 bg-transparent hover:bg-accent-2 hover:text-primary-bg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-2 transition-all duration-300 transform hover:-translate-y-1">
+                    查看综合洞察
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Content Area - 户晨风分析报告 -->
+        <section id="huchenfeng-report" class="space-y-8">
+            <h2 class="text-3xl sm:text-4xl font-display font-semibold text-text-light text-center mb-8">
+                户晨风专题分析
+            </h2>
+
+            <!-- Section I: 概况 (Overview) -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <button class="collapsible-button flex justify-between items-center w-full text-left font-display text-2xl sm:text-3xl font-medium text-accent-2 py-3 group" aria-expanded="false" aria-controls="content-overview">
+                    I. 概况 (Overview)
+                    <svg class="arrow w-6 h-6 text-accent-2 group-hover:text-accent-1 transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="content-overview" class="collapsible-content">
+                    <ul class="list-disc list-inside space-y-3 text-text-light pl-4">
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 户晨风是一位在B站拥有超过270万粉丝的知名UP主。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 他以其幽默风趣的视频风格和对社会热点事件的点评而闻名。</li>
+                        <li><span class="font-semibold text-accent-1">Key Event:</span> 他曾创作多部备受好评的科普视频，如“2023年中国收入报告”。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> “2023年中国收入报告”内容深入浅出，数据详实，获得了大量关注。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 户晨风并非专业经济学家。</li>
+                        <li><span class="font-semibold text-accent-1">Public/Expert Opinion:</span> 其对数据的使用和解读能力受到一些观众的认可。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section II: 争议性内容及言论 (Controversial Content and Remarks) -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <button class="collapsible-button flex justify-between items-center w-full text-left font-display text-2xl sm:text-3xl font-medium text-accent-2 py-3 group" aria-expanded="false" aria-controls="content-controversy">
+                    II. 争议性内容及言论 (Controversial Content and Remarks)
+                    <svg class="arrow w-6 h-6 text-accent-2 group-hover:text-accent-1 transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="content-controversy" class="collapsible-content">
+                    <ul class="list-disc list-inside space-y-3 text-text-light pl-4">
+                        <li><span class="font-semibold text-accent-1">Key Event:</span> 2023年10月，户晨风发布了一段名为《国内真实的收入，你根本想象不到》的视频。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 该视频旨在揭露部分低收入群体的真实生活状况。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 视频中，他深入农村地区，采访了多位月收入仅有数百元甚至更低的居民，展示了他们在温饱线上挣扎的困境。</li>
+                        <li><span class="font-semibold text-accent-1">Key Event:</span> 这段视频发布后迅速引发了巨大的社会反响。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 视频内容直指中国收入分配不均的现状，并质疑官方统计数据的真实性。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 他还在直播中多次发表关于经济下行、失业率上升等负面言论。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 他呼吁社会关注弱势群体，并批评一些官方媒体对经济形势的“粉饰太平”。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 他曾直播表示“我们不能只看那些光鲜亮丽的经济数据，更要关注底层人民的疾苦”。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section III: 公众与专家观点 (Public and Expert Views) -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <button class="collapsible-button flex justify-between items-center w-full text-left font-display text-2xl sm:text-3xl font-medium text-accent-2 py-3 group" aria-expanded="false" aria-controls="content-views">
+                    III. 公众与专家观点 (Public and Expert Views)
+                    <svg class="arrow w-6 h-6 text-accent-2 group-hover:text-accent-1 transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="content-views" class="collapsible-content">
+                    <ul class="list-disc list-inside space-y-3 text-text-light pl-4">
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 该视频及户晨风的言论引发了舆论两极分化的讨论。</li>
+                        <li><span class="font-semibold text-accent-1">Public/Expert Opinion (Supportive):</span> 许多网民和一部分社会学者认为，户晨风的视频揭示了社会真实问题，反映了底层人民的呼声，具有积极的社会意义。</li>
+                        <li><span class="font-semibold text-accent-1">Public/Expert Opinion (Supportive):</span> 他们赞扬户晨风的勇气和对社会责任的担当，认为他敢于说真话，戳破了“皇帝的新装”。</li>
+                        <li><span class="font-semibold text-accent-1">Public/Expert Opinion (Supportive):</span> 有评论指出，此类视频有助于引起社会对贫富差距问题的重视。</li>
+                        <li><span class="font-semibold text-accent-1">Public/Expert Opinion (Critical):</span> 另一些人则批评户晨风的视频“贩卖焦虑”，认为其选择性展示低收入群体，以偏概全，容易引发社会恐慌和负面情绪。</li>
+                        <li><span class="font-semibold text-accent-1">Public/Expert Opinion (Critical):</span> 部分经济学者指出，视频在数据选取和解读上存在偏颇，缺乏全面的经济分析框架，可能误导公众对整体经济形势的认知。</li>
+                        <li><span class="font-semibold text-accent-1">Public/Expert Opinion (Critical):</span> 他们认为，仅凭个例不能全面反映中国巨大的地域和城乡差异。</li>
+                        <li><span class="font-semibold text-accent-1">Public/Expert Opinion (Critical):</span> 有观点认为，他的言论是对中国经济发展的抹黑，损害了民族自信心。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Section IV: 官方监管与结果 (Official Regulation and Outcomes) -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <button class="collapsible-button flex justify-between items-center w-full text-left font-display text-2xl sm:text-3xl font-medium text-accent-2 py-3 group" aria-expanded="false" aria-controls="content-outcomes">
+                    IV. 官方监管与结果 (Official Regulation and Outcomes)
+                    <svg class="arrow w-6 h-6 text-accent-2 group-hover:text-accent-1 transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="content-outcomes" class="collapsible-content">
+                    <ul class="list-disc list-inside space-y-3 text-text-light pl-4">
+                        <li><span class="font-semibold text-accent-1">Official Response:</span> 鉴于视频和言论引发的广泛争议，平台方对户晨风的多个视频进行了下架处理。</li>
+                        <li><span class="font-semibold text-accent-1">Official Response:</span> 平台方限制了其部分账号功能。</li>
+                        <li><span class="font-semibold text-accent-1">Key Event:</span> 2023年11月，户晨风的B站账号因“违反社区规定”被暂时封禁。</li>
+                        <li><span class="font-semibold text-accent-1">Official Response:</span> 官方媒体和权威专家也对户晨风的言论进行了批评。</li>
+                        <li><span class="font-semibold text-accent-1">Official Response:</span> 他们强调要客观看待中国经济发展，警惕“唱衰”论调。</li>
+                        <li><span class="font-semibold text-accent-1">Official Response:</span> 例如，《人民日报》评论员文章曾间接指出，在分析经济问题时，应避免以点带面，夸大局部困难。</li>
+                        <li><span class="font-semibold text-accent-1">Key Event:</span> 户晨风本人在账号解封后，发布了一段“反思视频”。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> “反思视频”中，户晨风表示今后会更加谨慎地选择视频内容，并强调会更注重表达方式的严谨性。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 户晨风并未完全收回其核心观点。</li>
+                        <li><span class="font-semibold text-accent-1">Factual Statement:</span> 此后，他创作内容趋于保守，不再直接触及敏感的社会经济话题。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Area - 综合报告：事实发现与方法论洞察 -->
+        <section id="comprehensive-report" class="space-y-8 mt-16">
+            <h2 class="text-3xl sm:text-4xl font-display font-semibold text-text-light text-center mb-8">
+                综合报告：事实发现与方法论洞察
+            </h2>
+
+            <!-- 引言 (Introduction) -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <h3 class="font-display text-2xl sm:text-3xl font-medium text-accent-2 mb-4">引言</h3>
+                <p class="text-text-light leading-relaxed mb-4">本报告旨在综合分析来自“已收集数据”（Analyzed Gathered Data）和“自定义URL数据”（Analyzed Custom Url Data）的事实发现，并结合分析过程中的方法论洞察，形成一份全面而深入的报告。报告的目的是提供对当前产品/服务表现和市场状况的清晰理解，并指出未来改进和研究的方向。</p>
+                <ul class="list-disc list-inside space-y-2 text-text-light pl-4">
+                    <li><span class="font-semibold text-accent-1">报告目的</span>：整合多源数据，提供全面的洞察，支持决策制定。</li>
+                    <li><span class="font-semibold text-accent-1">数据来源概述</span>：本报告的主要数据来源包括对市场、用户反馈及社交媒体数据的“已收集数据”分析，以及针对特定推广页面的“自定义URL数据”分析。</li>
+                </ul>
+            </div>
+
+            <!-- 核心事实发现 (Core Factual Findings) - Sortable Table -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <h3 class="font-display text-2xl sm:text-3xl font-medium text-accent-2 mb-4">核心事实发现</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left table-auto border-collapse" id="factual-findings-table">
+                        <thead>
+                            <tr class="bg-gray-800 text-text-light text-sm sm:text-base">
+                                <th class="p-3 border-b-2 border-border-color cursor-pointer hover:bg-gray-700 transition duration-200" data-sort-by="category">类别 <span class="sort-icon ml-2"></span></th>
+                                <th class="p-3 border-b-2 border-border-color cursor-pointer hover:bg-gray-700 transition duration-200" data-sort-by="finding">发现 <span class="sort-icon ml-2"></span></th>
+                                <th class="p-3 border-b-2 border-border-color cursor-pointer hover:bg-gray-700 transition duration-200" data-sort-by="value">数值/细节 <span class="sort-icon ml-2"></span></th>
+                                <th class="p-3 border-b-2 border-border-color cursor-pointer hover:bg-gray-700 transition duration-200" data-sort-by="source">来源 <span class="sort-icon ml-2"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-text-muted divide-y divide-border-color">
+                            <!-- Data from "来自已收集数据的发现" -->
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">已收集数据</td>
+                                <td class="p-3">市场对A产品的需求增长</td>
+                                <td class="p-3">过去三个月增长率15%</td>
+                                <td class="p-3">AGD市场分析报告</td>
+                            </tr>
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">已收集数据</td>
+                                <td class="p-3">产品易用性</td>
+                                <td class="p-3">主要优点</td>
+                                <td class="p-3">AGD用户调查问卷</td>
+                            </tr>
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">已收集数据</td>
+                                <td class="p-3">电池续航能力</td>
+                                <td class="p-3">主要用户痛点</td>
+                                <td class="p-3">AGD用户调查问卷</td>
+                            </tr>
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">已收集数据</td>
+                                <td class="p-3">社交媒体提及量增长</td>
+                                <td class="p-3">环比增长20%</td>
+                                <td class="p-3">AGD社交媒体分析</td>
+                            </tr>
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">已收集数据</td>
+                                <td class="p-3">社交媒体正面情绪评论占比</td>
+                                <td class="p-3">70%</td>
+                                <td class="p-3">AGD社交媒体分析</td>
+                            </tr>
+                            <!-- Data from "来自自定义URL数据的发现" -->
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">自定义URL数据</td>
+                                <td class="p-3">推广页面点击率 (CTR)</td>
+                                <td class="p-3">8.5%</td>
+                                <td class="p-3">ACUD推广活动报告</td>
+                            </tr>
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">自定义URL数据</td>
+                                <td class="p-3">推广页面转化率 (Conversion Rate)</td>
+                                <td class="p-3">2.1%</td>
+                                <td class="p-3">ACUD推广活动报告</td>
+                            </tr>
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">自定义URL数据</td>
+                                <td class="p-3">产品特性介绍视频观看完成率</td>
+                                <td class="p-3">60%</td>
+                                <td class="p-3">ACUD内容互动分析</td>
+                            </tr>
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">自定义URL数据</td>
+                                <td class="p-3">用户平均停留时间</td>
+                                <td class="p-3">3分钟15秒</td>
+                                <td class="p-3">ACUD网站流量报告</td>
+                            </tr>
+                            <tr class="hover:bg-card-bg transition duration-200">
+                                <td class="p-3">自定义URL数据</td>
+                                <td class="p-3">推广页面跳出率</td>
+                                <td class="p-3">35%</td>
+                                <td class="p-3">ACUD网站流量报告</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 方法论洞察 (Methodological Insights) -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <h3 class="font-display text-2xl sm:text-3xl font-medium text-accent-2 mb-4">方法论洞察</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="p-4 bg-gray-800 rounded-lg shadow-inner border border-gray-700 hover:scale-105 transition duration-300">
+                        <h4 class="font-semibold text-lg text-accent-1 mb-2">数据收集过程中的挑战</h4>
+                        <p class="text-text-muted text-sm">在数据收集阶段，部分地区的用户样本难以获取，这可能导致最终数据集在地域代表性上存在一定偏差 [<span class="font-bold">MI数据收集日志</span>]。</p>
+                    </div>
+                    <div class="p-4 bg-gray-800 rounded-lg shadow-inner border border-gray-700 hover:scale-105 transition duration-300">
+                        <h4 class="font-semibold text-lg text-accent-1 mb-2">分析局限性</h4>
+                        <p class="text-text-muted text-sm">当前分析模型在处理非结构化文本数据时，对语义的深层理解存在局限性，可能无法完全捕捉到用户情感的细微之处 [<span class="font-bold">MI模型评估报告</span>]。</p>
+                    </div>
+                    <div class="p-4 bg-gray-800 rounded-lg shadow-inner border border-gray-700 hover:scale-105 transition duration-300">
+                        <h4 class="font-semibold text-lg text-accent-1 mb-2">未来研究建议</h4>
+                        <p class="text-text-muted text-sm">为更准确地评估特定功能改进的效果，建议在未来的研究中增加A/B测试环节，以获取更具统计学意义的结果 [<span class="font-bold">MI研究方法建议</span>]。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 总结与综合 (Summary and Synthesis) -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <h3 class="font-display text-2xl sm:text-3xl font-medium text-accent-2 mb-4">总结与综合</h3>
+                <ul class="list-disc list-inside space-y-4 text-text-light pl-4">
+                    <li><span class="font-semibold text-accent-1">关键发现总结</span>：综合来看，A产品在市场需求和用户正面情绪方面表现良好，尤其是在易用性方面获得认可。然而，电池续航是明确的用户痛点。自定义URL推广页面表现出较高的点击率和转化率，视频内容尤其受到用户欢迎。</li>
+                    <li><span class="font-semibold text-accent-1">跨数据源的综合分析</span>：
+                        <ul class="list-circle list-inside ml-6 space-y-2 text-text-muted">
+                            <li><span class="font-semibold text-accent-1">优势互补</span>：已收集数据显示市场对产品的积极需求和社交媒体的正面反馈，这与自定义URL页面的较高点击率和用户停留时间相互印证，表明产品和推广内容吸引力较强。</li>
+                            <li><span class="font-semibold text-accent-1">问题聚焦</span>：尽管推广效果良好，但用户反馈中对电池续航的关注，提示我们在产品迭代和后续内容优化中应重点解决这一问题。</li>
+                            <li><span class="font-semibold text-accent-1">方法论考量</span>：数据收集的地域偏差和文本语义分析的局限性，提醒我们在解读结果时需保持谨慎，并为未来的研究方法改进提供了明确的方向。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Analysis Framework & Methodology Overview -->
+            <div class="glassmorphism rounded-2xl p-6 sm:p-8 border-border-color border">
+                <h3 class="font-display text-2xl sm:text-3xl font-medium text-accent-2 mb-4">分析框架与方法论概述</h3>
+                <div class="space-y-6 text-text-light">
+                    <div>
+                        <h4 class="font-semibold text-xl text-accent-1 mb-2">数据收集 (Data Collection)</h4>
+                        <p class="text-text-muted">Custom URLs are acquired via direct user submission. Content extraction from these URLs employs a dedicated web scraping module designed to bypass common anti-bot measures and handle dynamic JavaScript content. Content is restricted to publicly accessible text data, excluding paywalled or login-protected resources.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-xl text-accent-1 mb-2">预处理 (Pre-processing)</h4>
+                        <p class="text-text-muted">Extracted text undergoes several stages: HTML tag removal, noise reduction (advertisements, navigation elements), language identification, text normalization (lowercase conversion, punctuation removal), stop-word filtering, and lemmatization. Non-English content is flagged and, if possible, translated using an integrated translation service before further processing, or excluded based on user-defined language scope.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-xl text-accent-1 mb-2">情感分析 (Sentiment Analysis)</h4>
+                        <p class="text-text-muted">Sentiment is determined using a hybrid approach combining a fine-tuned transformer-based deep learning model for nuanced sentiment detection (positive, negative, neutral, mixed) with a lexicon-based system for specific emotional valence identification (e.g., anger, joy). Results are quantified as a polarity score ranging from -1 to 1 and a subjectivity score from 0 to 1.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-xl text-accent-1 mb-2">主题建模 (Topic Modeling)</h4>
+                        <p class="text-text-muted">Latent Dirichlet Allocation (LDA) and Non-negative Matrix Factorization (NMF) are applied to identify overarching themes and sub-topics within the aggregated custom URL data. Topics are defined by clusters of co-occurring keywords, with their prevalence and evolution tracked over time.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-xl text-accent-1 mb-2">讨论趋势识别 (Discussion Trend Identification)</h4>
+                        <p class="text-text-muted">Trends are identified through a combination of temporal keyword frequency analysis, burst detection algorithms for sudden increases in topic mentions, and anomaly detection for unusual shifts in sentiment or topic distribution. Trends are categorized by their velocity, duration, and associated sentiment.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-xl text-accent-1 mb-2">社会群体视角区分 (Social Group Perspective Distinction)</h4>
+                        <p class="text-text-muted">Different social group perspectives are distinguished by clustering user-generated content (where applicable and available) based on inferred demographic markers (e.g., from public profiles, content style) and explicit stance detection on specific issues. This allows for the segmentation of opinions and the identification of divergent viewpoints across various inferred cohorts. (Attributed to 'Public Opinion Analysis Framework')</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-xl text-accent-1 mb-2">报告结构与发现标准 (Reporting Structure and Strict Criteria for Findings)</h4>
+                        <p class="text-text-muted">Findings are presented in a standardized report structure comprising an executive summary, detailed methodology, core insights (segmented by sentiment, topic, and trend), and actionable recommendations. Strict criteria for reporting findings include: statistical significance (p-value < 0.05 for quantitative claims), consistent trend observation over a minimum defined period, and corroboration across multiple data points or analytical methods. All reported insights must be traceable to raw data excerpts. (Attributed to 'Reporting and Synthesis Mechanism')</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-xl text-accent-1 mb-2">URL处理 (URL Handling)</h4>
+                        <p class="text-text-muted">Custom URLs are subjected to a validation process to ensure they are well-formed and accessible. A dedicated crawler module then fetches content, prioritizing text over media. URLs are cached for efficiency, and metadata (e.g., publication date, author, domain authority) is extracted and stored. Redundant or duplicate URLs are identified and processed only once, with content updates monitored based on a specified refresh interval. (Attributed to 'URL Source Acquisition and Management')</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('.collapsible-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const contentId = button.getAttribute('aria-controls');
+                    const content = document.getElementById(contentId);
+                    const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+                    button.setAttribute('aria-expanded', !isExpanded);
+                    if (!isExpanded) {
+                        // Expand
+                        content.style.maxHeight = content.scrollHeight + 'px'; // Set to actual height
+                        content.classList.add('active');
+                    } else {
+                        // Collapse
+                        content.style.maxHeight = '0';
+                        content.classList.remove('active');
+                    }
+                });
+            });
+
+            // Table sort functionality
+            const table = document.getElementById('factual-findings-table');
+            if (table) {
+                const headers = table.querySelectorAll('th[data-sort-by]');
+                const tbody = table.querySelector('tbody');
+                let sortDirection = {}; // Stores the sort direction for each column
+
+                headers.forEach(header => {
+                    const sortBy = header.dataset.sortBy;
+                    sortDirection[sortBy] = 'asc'; // Default sort direction
+
+                    const sortIcon = header.querySelector('.sort-icon');
+                    // Initialize sort icons (clear default and set a subtle neutral state)
+                    updateSortIcon(header, sortBy);
+
+                    header.addEventListener('click', () => {
+                        const rows = Array.from(tbody.querySelectorAll('tr'));
+                        const columnIndex = Array.from(headers).indexOf(header);
+
+                        rows.sort((a, b) => {
+                            let aText = a.children[columnIndex].textContent.trim();
+                            let bText = b.children[columnIndex].textContent.trim();
+
+                            // Attempt numerical conversion for comparison
+                            let aNum = parseFloat(aText);
+                            let bNum = parseFloat(bText);
+
+                            // Handle percentage and time strings for better numerical sorting
+                            if (aText.includes('%') && !isNaN(aNum) && bText.includes('%') && !isNaN(bNum)) {
+                                // For percentages, compare numerical values
+                                aText = aNum;
+                                bText = bNum;
+                            } else if (aText.includes('分钟') && bText.includes('分钟')) {
+                                // Convert "3分钟15秒" to total seconds for proper sorting
+                                aText = convertTimeToSeconds(aText);
+                                bText = convertTimeToSeconds(bText);
+                            } else if (!isNaN(aNum) && !isNaN(bNum) && sortBy !== 'source' && sortBy !== 'category') {
+                                // If both are numbers, compare as numbers, but exclude specific text columns
+                                aText = aNum;
+                                bText = bNum;
+                            } else {
+                                // Fallback to locale-aware string comparison for non-numeric or mixed content
+                                return aText.localeCompare(bText, 'zh-CN', { numeric: true, sensitivity: 'base' });
+                            }
+
+                            if (sortDirection[sortBy] === 'asc') {
+                                return aText > bText ? 1 : -1;
+                            } else {
+                                return aText < bText ? 1 : -1;
+                            }
+                        });
+
+                        // Toggle sort direction for the clicked column
+                        sortDirection[sortBy] = sortDirection[sortBy] === 'asc' ? 'desc' : 'asc';
+
+                        // Update all sort icons
+                        headers.forEach(h => {
+                            const hSortBy = h.dataset.sortBy;
+                            updateSortIcon(h, hSortBy, hSortBy === sortBy ? sortDirection[sortBy] : undefined);
+                        });
+
+                        // Re-append sorted rows
+                        rows.forEach(row => tbody.appendChild(row));
+                    });
+                });
+
+                function updateSortIcon(header, sortBy, currentDirection) {
+                    const icon = header.querySelector('.sort-icon');
+                    if (!icon) return;
+
+                    icon.innerHTML = ''; // Clear existing icon
+                    icon.classList.remove('opacity-100', 'text-accent-1');
+                    icon.classList.add('opacity-50', 'text-text-muted'); // Default neutral state
+
+                    if (currentDirection === 'asc') {
+                        icon.innerHTML = '&#9650;'; // Up arrow
+                        icon.classList.remove('opacity-50', 'text-text-muted');
+                        icon.classList.add('opacity-100', 'text-accent-1');
+                    } else if (currentDirection === 'desc') {
+                        icon.innerHTML = '&#9660;'; // Down arrow
+                        icon.classList.remove('opacity-50', 'text-text-muted');
+                        icon.classList.add('opacity-100', 'text-accent-1');
+                    }
+                }
+
+                function convertTimeToSeconds(timeStr) {
+                    const match = timeStr.match(/(\d+)分钟(\d+)秒/);
+                    if (match) {
+                        const minutes = parseInt(match[1]);
+                        const seconds = parseInt(match[2]);
+                        return minutes * 60 + seconds;
+                    }
+                    return parseFloat(timeStr) || 0; // Fallback for other formats
+                }
+            }
+        });
+    </script>
+</body>
+</html>
