@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Opinion Report: Analysis of 户晨风</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-light: 220 90% 65%; /* Sky Blue */
+            --primary-dark: 230 70% 30%;  /* Darker Blue */
+            --secondary-light: 270 90% 75%; /* Soft Purple */
+            --secondary-dark: 280 60% 35%; /* Deeper Purple */
+            --accent-glow: 200 90% 70%; /* Cyan Glow */
+        }
+        .text-gradient {
+            background: linear-gradient(90deg, hsl(var(--accent-glow)) 0%, hsl(var(--primary-light)) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bg-gradient-header {
+            background: linear-gradient(135deg, hsl(var(--primary-dark)) 0%, hsl(var(--secondary-dark)) 100%);
+        }
+        .glass-card {
+            background-color: rgba(30, 30, 50, 0.4); /* Darker base for glass */
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(70, 70, 100, 0.3);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .scroll-snap-section {
+            scroll-snap-align: start;
+        }
+        .nav-item.active {
+            position: relative;
+            color: hsl(var(--accent-glow));
+            transform: translateY(-2px);
+            transition: transform 0.2s ease-in-out;
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, hsl(var(--accent-glow)), hsl(var(--primary-light)));
+            border-radius: 1px;
+            animation: fadeInBorder 0.3s ease-out forwards;
+        }
+        @keyframes fadeInBorder {
+            from { width: 0%; opacity: 0; }
+            to { width: 80%; opacity: 1; }
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: hsl(230 20% 15%);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: hsl(var(--primary-dark) / 0.7);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: hsl(var(--primary-light) / 0.8);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': 'hsl(var(--primary-light))',
+                        'primary-dark': 'hsl(var(--primary-dark))',
+                        'secondary-light': 'hsl(var(--secondary-light))',
+                        'secondary-dark': 'hsl(var(--secondary-dark))',
+                        'accent-glow': 'hsl(var(--accent-glow))',
+                        'dark-bg': 'hsl(230 20% 10%)',
+                        'dark-card': 'hsl(230 20% 15%)',
+                        'dark-text': 'hsl(210 30% 90%)',
+                        'dark-muted': 'hsl(210 15% 60%)',
+                    },
+                    fontFamily: {
+                        display: ['Outfit', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'scale-in': 'scaleIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                    }
+                },
+            },
+        };
+    </script>
+</head>
+<body class="bg-dark-bg text-dark-text font-body antialiased scroll-smooth">
+
+    <!-- Sticky Navigation -->
+    <nav id="report-nav" class="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md shadow-lg py-4 transition-all duration-300 ease-in-out">
+        <div class="container mx-auto px-6 flex justify-center items-center">
+            <div class="flex space-x-6 md:space-x-10 text-lg font-medium">
+                <a href="#summary" class="nav-item text-dark-muted hover:text-primary-light transition duration-300 ease-in-out">Summary</a>
+                <a href="#topics" class="nav-item text-dark-muted hover:text-primary-light transition duration-300 ease-in-out">Topics</a>
+                <a href="#criticisms" class="nav-item text-dark-muted hover:text-primary-light transition duration-300 ease-in-out">Criticisms</a>
+                <a href="#influence" class="nav-item text-dark-muted hover:text-primary-light transition duration-300 ease-in-out">Influence</a>
+                <a href="#social-impact" class="nav-item text-dark-muted hover:text-primary-light transition duration-300 ease-in-out">Social Impact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="min-h-screen flex flex-col justify-center items-center py-16 px-4 md:px-8 lg:px-12 relative overflow-hidden">
+        <!-- Background Plasma Effect (Subtle) -->
+        <div class="absolute inset-0 z-0 opacity-20">
+            <div class="absolute w-96 h-96 bg-primary-dark rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob top-10 left-10"></div>
+            <div class="absolute w-96 h-96 bg-secondary-dark rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000 top-0 right-10"></div>
+            <div class="absolute w-96 h-96 bg-accent-glow rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000 -bottom-8 left-1/4"></div>
+        </div>
+
+        <main class="container mx-auto max-w-7xl z-10 space-y-12 lg:space-y-16">
+
+            <!-- Header Section -->
+            <header class="text-center py-16 px-6 bg-gradient-header rounded-3xl shadow-xl glass-card animate-fade-in-up delay-100">
+                <h1 class="font-display text-5xl md:text-7xl font-bold mb-4 text-gradient leading-tight">
+                    Public Opinion Report
+                </h1>
+                <p class="text-2xl md:text-3xl font-light text-dark-text">
+                    In-depth Analysis of <span class="text-accent-glow font-semibold">户晨风</span>'s Digital Footprint
+                </p>
+                <p class="mt-6 text-lg text-dark-muted max-w-3xl mx-auto">
+                    This report synthesizes public sentiment and discussion surrounding the influential online personality 户晨风, exploring key themes, controversies, and the broader societal implications of their digital presence.
+                </p>
+            </header>
+
+            <!-- Summary Section -->
+            <section id="summary" class="scroll-snap-section glass-card p-8 md:p-12 animate-fade-in-up delay-200 shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 text-primary-light">Overview and Key Findings</h2>
+                <div class="grid md:grid-cols-2 gap-8 text-lg">
+                    <div>
+                        <p class="mb-4">
+                            The discourse surrounding 户晨风 is complex and highly polarized. Analysis reveals a prominent divide between a dedicated, often fervent, fanbase and vocal critics from various sectors. Key themes include debates over content ethics, freedom of expression, and the responsibilities of online platforms.
+                        </p>
+                        <p class="mb-4">
+                            Despite significant platform interventions and bans, 户晨风's influence persists through what has been termed "赛博永生" (cyber immortality), involving content re-uploads and the emergence of numerous imitators. This underscores challenges in content moderation and the lasting impact of digital personas.
+                        </p>
+                    </div>
+                    <div>
+                        <ul class="list-disc pl-5 space-y-3 text-dark-muted">
+                            <li class="hover:text-primary-light transition duration-200">
+                                <strong class="text-dark-text">Polarized Sentiment:</strong> Strong support balanced against significant condemnation.
+                            </li>
+                            <li class="hover:text-primary-light transition duration-200">
+                                <strong class="text-dark-text">Persistent Influence:</strong> Bans have led to "cyber immortality" and a rise in imitators.
+                            </li>
+                            <li class="hover:text-primary-light transition duration-200">
+                                <strong class="text-dark-text">Content Ethics Debate:</strong> Ongoing discussions on responsibility vs. free speech.
+                            </li>
+                            <li class="hover:text-primary-light transition duration-200">
+                                <strong class="text-dark-text">Social Engineering Potential:</strong> Concerns regarding manipulation and echo chamber formation.
+                            </li>
+                            <li class="hover:text-primary-light transition duration-200">
+                                <strong class="text-dark-text">Platform Challenges:</strong> Difficulty in curbing widespread, decentralized content.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Core Discussion Topics Section -->
+            <section id="topics" class="scroll-snap-section glass-card p-8 md:p-12 animate-fade-in-up delay-300 shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 text-primary-light">Core Discussion Topics & Attention Levels</h2>
+                <div id="collapsible-container" class="space-y-4">
+                    <!-- Topic 1 -->
+                    <div class="collapsible-item glass-card p-6 cursor-pointer transform hover:scale-[1.01] transition-all duration-300 ease-in-out">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-display text-2xl font-semibold text-accent-glow">Content Controversies & Misinformation</h3>
+                            <svg class="w-6 h-6 text-dark-muted transform rotate-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="collapsible-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out pt-0 opacity-0">
+                            <p class="mt-4 text-dark-muted">
+                                A significant portion of public discussion revolves around the factual accuracy and ethical implications of 户晨风's content. Accusations of spreading misinformation, particularly on sensitive social and political issues, are common among critics. Fans, however, often frame this as challenging mainstream narratives or expressing alternative viewpoints.
+                            </p>
+                            <div class="mt-4 p-4 rounded-xl bg-dark-card border border-primary-dark/50">
+                                <h4 class="font-semibold text-lg mb-2 text-primary-light">Sentiment Breakdown (Invented Data)</h4>
+                                <ul class="text-sm space-y-2 text-dark-muted">
+                                    <li>Positive Sentiment: <span class="font-bold text-accent-glow">25%</span> (Perceived as 'truth-telling')</li>
+                                    <li>Negative Sentiment: <span class="font-bold text-red-400">55%</span> (Concerns about misinformation)</li>
+                                    <li>Neutral/Debate: <span class="font-bold text-yellow-400">20%</span> (Discussions around interpretation)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Topic 2 -->
+                    <div class="collapsible-item glass-card p-6 cursor-pointer transform hover:scale-[1.01] transition-all duration-300 ease-in-out">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-display text-2xl font-semibold text-accent-glow">Fan Support, Loyalty & Free Speech</h3>
+                            <svg class="w-6 h-6 text-dark-muted transform rotate-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="collapsible-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out pt-0 opacity-0">
+                            <p class="mt-4 text-dark-muted">
+                                户晨风 commands an exceptionally loyal following, who often view platform bans and criticisms as acts of censorship and an infringement on free speech. Online communities dedicated to 户晨风 actively defend his content and promote his continued presence, often employing counter-narratives against mainstream media.
+                            </p>
+                            <div class="mt-4 p-4 rounded-xl bg-dark-card border border-primary-dark/50">
+                                <h4 class="font-semibold text-lg mb-2 text-primary-light">Engagement Metrics (Invented Data)</h4>
+                                <ul class="text-sm space-y-2 text-dark-muted">
+                                    <li>Mentions of "Free Speech": <span class="font-bold text-accent-glow">High (8/10)</span></li>
+                                    <li>Community Growth Rate (Post-ban): <span class="font-bold text-green-400">+15%</span></li>
+                                    <li>"Against Censorship" Tags: <span class="font-bold text-red-400">Frequent</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Topic 3 -->
+                    <div class="collapsible-item glass-card p-6 cursor-pointer transform hover:scale-[1.01] transition-all duration-300 ease-in-out">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-display text-2xl font-semibold text-accent-glow">Impact on Youth & Digital Literacy</h3>
+                            <svg class="w-6 h-6 text-dark-muted transform rotate-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="collapsible-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out pt-0 opacity-0">
+                            <p class="mt-4 text-dark-muted">
+                                Concerns are frequently raised about the potential influence of 户晨风's content on younger audiences. Critics argue that his discourse may contribute to polarization, distrust in traditional institutions, and a reduced capacity for critical thinking among digitally native youth who lack robust media literacy skills.
+                            </p>
+                            <div class="mt-4 p-4 rounded-xl bg-dark-card border border-primary-dark/50">
+                                <h4 class="font-semibold text-lg mb-2 text-primary-light">Demographic Insights (Invented Data)</h4>
+                                <ul class="text-sm space-y-2 text-dark-muted">
+                                    <li>Audience Age Group (Primary): <span class="font-bold text-accent-glow">18-34 years (60%)</span></li>
+                                    <li>Parental Concern Index: <span class="font-bold text-red-400">High (7/10)</span></li>
+                                    <li>Discussions on 'Critical Thinking': <span class="font-bold text-yellow-400">Moderate</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Official Media Criticisms Section -->
+            <section id="criticisms" class="scroll-snap-section glass-card p-8 md:p-12 animate-fade-in-up delay-400 shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 text-primary-light">Official Media Criticisms & Accusations</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="p-6 bg-dark-card rounded-2xl border border-secondary-dark/50 hover:border-accent-glow transition duration-300">
+                            <h3 class="font-display text-2xl font-semibold mb-3 text-secondary-light">Promotion of Divisive Narratives</h3>
+                            <p class="text-dark-muted">
+                                Several prominent media outlets have accused 户晨风 of deliberately promoting divisive narratives, often exaggerating social fissures and creating 'us vs. them' mentalities. Specific reports cite instances where his content amplified political extremism and fostered mistrust between different societal groups.
+                            </p>
+                        </div>
+                        <div class="p-6 bg-dark-card rounded-2xl border border-secondary-dark/50 hover:border-accent-glow transition duration-300">
+                            <h3 class="font-display text-2xl font-semibold mb-3 text-secondary-light">Exploitation of Niche Communities</h3>
+                            <p class="text-dark-muted">
+                                Accusations include exploiting the grievances and anxieties of specific online niche communities. Critics suggest 户晨风 tailors content to resonate deeply within these groups, thereby solidifying loyalty and making them more resistant to external viewpoints or counter-arguments.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="p-6 bg-dark-card rounded-2xl border border-secondary-dark/50 hover:border-accent-glow transition duration-300">
+                            <h3 class="font-display text-2xl font-semibold mb-3 text-secondary-light">Incitement of Online Harassment</h3>
+                            <p class="text-dark-muted">
+                                Numerous complaints and journalistic investigations link 户晨风's content to patterns of online harassment. While not directly endorsing harassment, critics argue his rhetoric often frames individuals or groups as adversaries, leading his followers to engage in targeted online attacks and brigading.
+                            </p>
+                        </div>
+                        <div class="p-6 bg-dark-card rounded-2xl border border-secondary-dark/50 hover:border-accent-glow transition duration-300">
+                            <h3 class="font-display text-2xl font-semibold mb-3 text-secondary-light">Lack of Accountability & Transparency</h3>
+                            <p class="text-dark-muted">
+                                Media reports frequently highlight 户晨风's perceived lack of accountability for the factual inaccuracies in his content or the behavior of his community. Calls for greater transparency regarding his content creation process and funding sources have largely gone unanswered.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Influence & Dynamics Section -->
+            <section id="influence" class="scroll-snap-section glass-card p-8 md:p-12 animate-fade-in-up delay-500 shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 text-primary-light">Influence, Content Spread & Post-Ban Dynamics</h2>
+                <div class="grid lg:grid-cols-3 gap-8 text-lg">
+                    <div class="lg:col-span-2 space-y-6">
+                        <p class="text-dark-muted">
+                            Despite numerous platform bans and content removals, 户晨风's influence exhibits remarkable resilience. This phenomenon, often termed "赛博永生" (cyber immortality), describes how his content and persona transcend official censorship through decentralized re-uploads, fan archives, and widespread discussion across various platforms and dark social channels.
+                        </p>
+                        <p class="text-dark-muted">
+                            The post-ban landscape has also seen the emergence of a significant number of imitators. These individuals adopt 户晨风's style, thematic focus, or even directly re-upload his content, further complicating efforts to contain the spread of similar narratives and ideas. This fragmented and adaptive ecosystem presents a unique challenge for content moderation.
+                        </p>
+                    </div>
+                    <div class="glass-card p-6 flex flex-col justify-center items-center text-center border-l-4 border-primary-light/50 bg-dark-card/50">
+                        <p class="font-display text-5xl font-extrabold text-gradient mb-2">
+                            赛博永生
+                        </p>
+                        <p class="text-xl font-semibold text-secondary-light mb-4">
+                            (Cyber Immortality)
+                        </p>
+                        <p class="text-dark-muted text-sm">
+                            The digital persistence of a persona despite bans, sustained by community re-uploads and decentralized presence.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-10">
+                    <h3 class="font-display text-2xl font-semibold mb-4 text-accent-glow">Metrics of Persistence (Invented Data)</h3>
+                    <div class="overflow-x-auto glass-card rounded-xl shadow-inner p-4">
+                        <table id="influenceTable" class="min-w-full divide-y divide-primary-dark/50">
+                            <thead>
+                                <tr class="text-left text-dark-muted uppercase text-sm font-semibold tracking-wider">
+                                    <th class="py-3 px-4 cursor-pointer hover:text-primary-light transition duration-200" data-sort="topic">Topic <span class="sort-icon"></span></th>
+                                    <th class="py-3 px-4 cursor-pointer hover:text-primary-light transition duration-200" data-sort="platform-count">Platforms <span class="sort-icon"></span></th>
+                                    <th class="py-3 px-4 cursor-pointer hover:text-primary-light transition duration-200" data-sort="reupload-rate">Re-upload Rate <span class="sort-icon"></span></th>
+                                    <th class="py-3 px-4 cursor-pointer hover:text-primary-light transition duration-200" data-sort="imitator-growth">Imitator Growth (YoY) <span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-primary-dark/30 text-dark-text">
+                                <tr class="hover:bg-dark-card/30 transition-colors duration-200">
+                                    <td class="py-3 px-4">Content Mirrors</td>
+                                    <td class="py-3 px-4">12+</td>
+                                    <td class="py-3 px-4">85%</td>
+                                    <td class="py-3 px-4">+25%</td>
+                                </tr>
+                                <tr class="hover:bg-dark-card/30 transition-colors duration-200">
+                                    <td class="py-3 px-4">Fan Forums</td>
+                                    <td class="py-3 px-4">8+</td>
+                                    <td class="py-3 px-4">70%</td>
+                                    <td class="py-3 px-4">+18%</td>
+                                </tr>
+                                <tr class="hover:bg-dark-card/30 transition-colors duration-200">
+                                    <td class="py-3 px-4">Private Groups</td>
+                                    <td class="py-3 px-4">20+</td>
+                                    <td class="py-3 px-4">90%</td>
+                                    <td class="py-3 px-4">+30%</td>
+                                </tr>
+                                <tr class="hover:bg-dark-card/30 transition-colors duration-200">
+                                    <td class="py-3 px-4">Translated Content</td>
+                                    <td class="py-3 px-4">5+</td>
+                                    <td class="py-3 px-4">60%</td>
+                                    <td class="py-3 px-4">+10%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Social Engineering Potential Section -->
+            <section id="social-impact" class="scroll-snap-section glass-card p-8 md:p-12 animate-fade-in-up delay-600 shadow-lg">
+                <h2 class="font-display text-4xl font-bold mb-6 text-primary-light">Social Engineering Potential & Psychological Effects</h2>
+                <div class="grid md:grid-cols-2 gap-8 text-lg">
+                    <div class="space-y-6">
+                        <p class="text-dark-muted">
+                            The analytical content suggests that 户晨风's discourse possesses significant social engineering potential. His persuasive techniques often leverage emotional appeals, common grievances, and a narrative that positions his followers as enlightened outsiders. This can lead to the formation of powerful echo chambers, where confirmation bias is amplified and critical evaluation of information is suppressed.
+                        </p>
+                        <p class="text-dark-muted">
+                            The psychological effects on dedicated followers can include heightened distrust of mainstream institutions, increased polarization, and a strong sense of identity tied to the shared beliefs promoted by 户晨风. This dynamic makes individuals less susceptible to factual corrections and more prone to collective action based on shared, often skewed, perceptions.
+                        </p>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="p-6 bg-dark-card rounded-2xl border border-primary-dark/50 hover:border-accent-glow transition duration-300">
+                            <h3 class="font-display text-2xl font-semibold mb-3 text-accent-glow">Echo Chamber Formation</h3>
+                            <p class="text-dark-muted">
+                                户晨风's content reinforces existing biases, creating closed systems where dissenting views are actively rejected or ridiculed, leading to insular communities.
+                            </p>
+                        </div>
+                        <div class="p-6 bg-dark-card rounded-2xl border border-primary-dark/50 hover:border-accent-glow transition duration-300">
+                            <h3 class="font-display text-2xl font-semibold mb-3 text-accent-glow">Manipulation Tactics</h3>
+                            <p class="text-dark-muted">
+                                Analysis indicates the use of emotional rhetoric, strawman arguments, and selective presentation of facts to steer audience opinion without logical justification.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Smooth Scroll for Navigation
+            document.querySelectorAll('nav a').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Collapsible Sections
+            const collapsibleItems = document.querySelectorAll('.collapsible-item');
+            collapsibleItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const content = item.querySelector('.collapsible-content');
+                    const icon = item.querySelector('svg');
+
+                    if (content.classList.contains('active')) {
+                        content.style.maxHeight = '0';
+                        content.classList.remove('active');
+                        content.classList.remove('opacity-100');
+                        content.classList.add('opacity-0');
+                        icon.style.transform = 'rotate(0deg)';
+                        content.style.paddingTop = '0';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        content.classList.add('active');
+                        content.classList.remove('opacity-0');
+                        content.classList.add('opacity-100');
+                        icon.style.transform = 'rotate(180deg)';
+                        content.style.paddingTop = '1rem'; // Add padding after expanding
+                    }
+                });
+            });
+
+            // Sortable Table
+            const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+
+            const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
+                v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+            )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                let asc = true;
+                th.addEventListener('click', () => {
+                    const table = th.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    Array.from(tbody.querySelectorAll('tr'))
+                        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), asc = !asc))
+                        .forEach(tr => tbody.appendChild(tr));
+
+                    // Reset sort icons
+                    document.querySelectorAll('th[data-sort] .sort-icon').forEach(icon => icon.textContent = '');
+                    // Set current sort icon
+                    th.querySelector('.sort-icon').textContent = asc ? ' ▲' : ' ▼';
+                });
+            });
+
+            // Navigation Active State on Scroll
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('#report-nav .nav-item');
+
+            const options = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5 // Adjust this value: percentage of the section that needs to be visible
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            link.style.color = ''; // Reset color
+                            if (link.getAttribute('href') === `#${entry.target.id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, options);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
