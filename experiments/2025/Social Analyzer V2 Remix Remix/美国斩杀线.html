@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Opinion Report: US Economic Vulnerabilities</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Outfit for display, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer base {
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                font-family: 'Inter', sans-serif;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                font-family: 'Outfit', sans-serif;
+            }
+            /* Custom styling for details/summary */
+            details > summary::-webkit-details-marker {
+                display: none;
+            }
+            details > summary {
+                list-style: none;
+            }
+            details[open] summary ~ * {
+                animation: slideDown 0.3s ease-out forwards;
+            }
+            @keyframes slideDown {
+                0% { opacity: 0; transform: translateY(-10px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+        }
+        @layer components {
+            .nav-link {
+                @apply block py-3 px-4 rounded-lg text-lg transition-all duration-300 ease-in-out relative
+                       text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-primary-600/30 hover:to-transparent;
+            }
+            .nav-link.active {
+                @apply text-white bg-gradient-to-r from-primary-600/50 to-transparent shadow-lg transform scale-105;
+            }
+            .data-card {
+                @apply bg-card-700/60 backdrop-blur-lg rounded-2xl p-6 lg:p-8 border border-card-600/70 shadow-xl relative overflow-hidden
+                       transition-all duration-300 ease-in-out hover:shadow-2xl hover:border-primary-500/50;
+            }
+            .data-card::before {
+                content: '';
+                @apply absolute inset-0 bg-gradient-to-br from-card-900/10 to-transparent -z-10;
+            }
+            .collapsible-summary {
+                @apply text-2xl font-bold text-primary-300 cursor-pointer py-4 flex items-center justify-between
+                       hover:text-primary-200 transition-colors duration-300;
+            }
+            .collapsible-content {
+                @apply p-4 pt-0 text-gray-300 leading-relaxed;
+            }
+            .section-title {
+                @apply text-4xl lg:text-5xl font-extrabold text-white mb-8 relative pb-4;
+            }
+            .section-title::after {
+                content: '';
+                @apply absolute left-0 bottom-0 w-24 h-1 bg-primary-500 rounded-full;
+            }
+            .highlight-data {
+                @apply text-primary-400 font-bold text-xl inline-block mr-2;
+            }
+            .sub-section-heading {
+                @apply text-xl lg:text-2xl font-bold text-primary-400 mb-3 mt-6;
+            }
+            .main-content-area {
+                @apply lg:col-span-3 xl:col-span-4 p-6 lg:p-10 min-h-screen bg-gradient-to-br from-background-950 to-background-900 shadow-inner z-0;
+            }
+            .value-display {
+                @apply inline-block bg-primary-700/30 text-primary-200 font-semibold px-2 py-0.5 rounded-md text-base;
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: {
+                            950: '#0A0A0E',
+                            900: '#101014',
+                        },
+                        card: {
+                            900: '#1A1A22',
+                            800: '#22222B',
+                            700: '#2C2C35',
+                            600: '#3A3A45',
+                        },
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9', // Base blue
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#082f49',
+                        },
+                        accent: { // A vibrant complementary color, e.g., a teal or green
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981', // Base teal
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-sm': '0 0 5px rgba(14, 165, 233, 0.4)',
+                        'glow-md': '0 0 15px rgba(14, 165, 233, 0.6)',
+                        'glow-lg': '0 0 30px rgba(14, 165, 233, 0.8)',
+                    }
+                },
+            },
+            plugins: [],
+        }
+    </script>
+</head>
+<body class="bg-background-950 text-gray-200 antialiased leading-relaxed tracking-wide min-h-screen flex flex-col">
+
+    <div class="relative w-full max-w-7xl mx-auto flex flex-col lg:flex-row min-h-screen overflow-hidden rounded-2xl lg:my-8 shadow-2xl shadow-primary-950/50">
+
+        <!-- Sidebar Navigation (Desktop) & Mobile Toggle -->
+        <aside class="lg:sticky lg:top-0 lg:h-screen lg:w-1/4 xl:w-1/5 bg-card-900 p-6 lg:p-8 flex flex-col z-10 shadow-lg lg:shadow-xl">
+            <div class="flex items-center justify-between lg:justify-start mb-8">
+                <h1 class="text-3xl font-extrabold text-white">
+                    <span class="text-primary-400">REPORT</span> <span class="block text-xl lg:text-2xl font-outfit font-light">Overview</span>
+                </h1>
+                <button id="mobile-menu-toggle" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-card-700 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+
+            <nav id="main-navigation" class="hidden lg:block lg:flex-grow lg:overflow-y-auto">
+                <ul class="space-y-3">
+                    <li><a href="#core-discussion" class="nav-link">Core Discussion Topics</a></li>
+                    <li><a href="#economic-vulnerabilities" class="nav-link">US Economic Vulnerabilities</a></li>
+                    <li><a href="#national-debt" class="nav-link ml-4 text-sm">National Debt</a></li>
+                    <li><a href="#inflation" class="nav-link ml-4 text-sm">Inflation</a></li>
+                    <li><a href="#high-interest-rates" class="nav-link ml-4 text-sm">High Interest Rates</a></li>
+                    <li><a href="#asset-bubbles" class="nav-link ml-4 text-sm">Asset Bubbles</a></li>
+                    <li><a href="#corporate-household-leverage" class="nav-link ml-4 text-sm">Corporate & Household Leverage</a></li>
+                    <li><a href="#income-inequality" class="nav-link ml-4 text-sm">Income Inequality</a></li>
+                    <li><a href="#manufacturing-decline" class="nav-link ml-4 text-sm">Manufacturing Decline</a></li>
+                    <li><a href="#aging-infrastructure" class="nav-link ml-4 text-sm">Aging Infrastructure</a></li>
+                    <li><a href="#key-issue-identification" class="nav-link">Key Issue Identification</a></li>
+                    <li><a href="#debt-ceiling" class="nav-link ml-4 text-sm">Debt Ceiling & Stability</a></li>
+                    <li><a href="#inflation-monetary-policy" class="nav-link ml-4 text-sm">Inflation & Monetary Policy</a></li>
+                    <li><a href="#banking-pressure" class="nav-link ml-4 text-sm">Banking Pressure</a></li>
+                    <li><a href="#recession-prospects" class="nav-link ml-4 text-sm">Recession Prospects</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content-area flex-grow">
+            <!-- Hero/Intro Section -->
+            <section class="mb-16 text-center lg:text-left relative py-12 px-4 rounded-xl overflow-hidden
+                            bg-gradient-to-br from-primary-950/50 to-background-900/50 shadow-lg border border-primary-800/60">
+                <div class="absolute inset-0 opacity-10 blur-3xl z-0 bg-gradient-to-r from-primary-500 to-accent-500"></div>
+                <div class="relative z-10">
+                    <h2 class="text-5xl lg:text-7xl font-extrabold text-white mb-4 leading-tight">
+                        <span class="text-primary-300">PUBLIC OPINION</span><br>
+                        <span class="text-white">REPORT</span>
+                    </h2>
+                    <p class="text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto lg:mx-0">
+                        Analyzing <span class="text-primary-400 font-semibold">US Economic & Life Vulnerabilities</span>:
+                        Insights into the '美国斩杀线' (US Kill Line).
+                    </p>
+                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto lg:mx-0">
+                        A detailed examination of critical indicators and societal challenges.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Core Discussion Topics -->
+            <section id="core-discussion" class="mb-16">
+                <h2 class="section-title">Core Discussion Topics</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="data-card">
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center"><span class="text-primary-400 mr-2">&bull;</span> High Medical Expenses</h3>
+                        <p class="text-gray-300">Examining the burden of healthcare costs on US households and its impact on financial stability.</p>
+                    </div>
+                    <div class="data-card">
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center"><span class="text-primary-400 mr-2">&bull;</span> Insufficient Savings</h3>
+                        <p class="text-gray-300">Analysis of the low personal savings rates and the lack of financial buffers for emergencies.</p>
+                    </div>
+                    <div class="data-card">
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center"><span class="text-primary-400 mr-2">&bull;</span> Social Safety Net Weaknesses</h3>
+                        <p class="text-gray-300">Investigating gaps in social support systems and their effect on vulnerable populations.</p>
+                    </div>
+                    <div class="data-card">
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center"><span class="text-primary-400 mr-2">&bull;</span> Wealth Disparity</h3>
+                        <p class="text-gray-300">Diving into the growing gap between the rich and poor, and its socio-economic consequences.</p>
+                    </div>
+                    <div class="data-card">
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center"><span class="text-primary-400 mr-2">&bull;</span> Class Immobility</h3>
+                        <p class="text-gray-300">Exploring the challenges individuals face in moving up the socio-economic ladder.</p>
+                    </div>
+                    <div class="data-card">
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center"><span class="text-primary-400 mr-2">&bull;</span> Comparisons to Chinese Social Systems</h3>
+                        <p class="text-gray-300">A comparative look at different social welfare and economic models.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- US Economic Vulnerabilities: Supporting Data and Contextual Information -->
+            <section id="economic-vulnerabilities" class="mb-16">
+                <h2 class="section-title">US Economic Vulnerabilities</h2>
+
+                <div class="space-y-8">
+                    <!-- National Debt -->
+                    <details class="data-card group" id="national-debt">
+                        <summary class="collapsible-summary">
+                            <span>National Debt</span>
+                            <svg class="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="collapsible-content">
+                            <h3 class="sub-section-heading">导言与定义 (Introduction & Definition)</h3>
+                            <p class="mb-4">美国国债在2023年已突破<span class="highlight-data">33万亿美元</span>，且仍在快速增长，预计到2033年将达到<span class="highlight-data">50万亿美元</span>。</p>
+                            <p class="mb-4">2023财年，美国联邦政府利息支出超过<span class="highlight-data">8790亿美元</span>，约为国防开支的1.5倍。</p>
+                            <p>高额国债挤压了其他公共支出空间，并增加了未来财政危机的风险。</p>
+
+                            <h3 class="sub-section-heading">比较与宏观经济层面 (Comparison & Macroeconomic Context)</h3>
+                            <p class="mb-4">美国债务与GDP之比（超过<span class="highlight-data">120%</span>）高于主要发达国家，且增长速度快于G7国家平均水平。</p>
+                            <p>高额国债限制了美国在面对外部冲击时的财政政策空间。</p>
+                        </div>
+                    </details>
+
+                    <!-- Inflation -->
+                    <details class="data-card group" id="inflation">
+                        <summary class="collapsible-summary">
+                            <span>Inflation</span>
+                            <svg class="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="collapsible-content">
+                            <h3 class="sub-section-heading">导言与定义 (Introduction & Definition)</h3>
+                            <p class="mb-4">2022年美国通货膨胀率一度达到<span class="highlight-data">9.1%</span>的峰值，虽有回落但仍高于美联储2%的目标。</p>
+                            <p>高通胀侵蚀了民众购买力，对中低收入家庭影响更大。</p>
+
+                            <h3 class="sub-section-heading">比较与宏观经济层面 (Comparison & Macroeconomic Context)</h3>
+                            <p>尽管全球面临通胀压力，但美国通胀的结构性因素（如劳动力市场紧张、供应链重构成本）可能使其通胀更具韧性。</p>
+                        </div>
+                    </details>
+
+                    <!-- High Interest Rates -->
+                    <details class="data-card group" id="high-interest-rates">
+                        <summary class="collapsible-summary">
+                            <span>High Interest Rates</span>
+                            <svg class="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="collapsible-content">
+                            <h3 class="sub-section-heading">导言与定义 (Introduction & Definition)</h3>
+                            <p class="mb-4">美联储为抑制通胀，自2022年以来多次加息，联邦基金利率已升至<span class="highlight-data">22年</span>来的最高水平。</p>
+                            <p>高利率增加了政府、企业和家庭的借贷成本，抑制了投资和消费。</p>
+
+                            <h3 class="sub-section-heading">比较与宏观经济层面 (Comparison & Macroeconomic Context)</h3>
+                            <p class="mb-4">美联储持续加息导致美元走强，对新兴市场和欧洲国家造成资本外流压力。</p>
+                            <p>高利率加剧了美国政府的债务负担。</p>
+                        </div>
+                    </details>
+
+                    <!-- Asset Bubbles -->
+                    <details class="data-card group" id="asset-bubbles">
+                        <summary class="collapsible-summary">
+                            <span>Asset Bubbles</span>
+                            <svg class="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="collapsible-content">
+                            <h3 class="sub-section-heading">导言与定义 (Introduction & Definition)</h3>
+                            <p class="mb-4">股市和房地产市场估值普遍偏高。标普500市盈率远高于历史平均水平，部分科技股存在泡沫风险。</p>
+                            <p>房地产市场在疫情期间经历快速上涨，尽管有所调整，但部分地区房价仍处于高位，存在潜在泡沫风险。</p>
+
+                            <h3 class="sub-section-heading">比较与宏观经济层面 (Comparison & Macroeconomic Context)</h3>
+                            <p>与其他主要经济体相比，美国股市和房地产市场的估值泡沫化程度更高，这与美联储长期宽松的货币政策有关。</p>
+                        </div>
+                    </details>
+
+                    <!-- Corporate and Household Leverage -->
+                    <details class="data-card group" id="corporate-household-leverage">
+                        <summary class="collapsible-summary">
+                            <span>Corporate and Household Leverage</span>
+                            <svg class="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="collapsible-content">
+                            <h3 class="sub-section-heading">导言与定义 (Introduction & Definition)</h3>
+                            <p class="mb-2"><strong class="text-primary-300">企业杠杆:</strong> 美国企业债务总额接近<span class="highlight-data">19万亿美元</span>，其中高收益垃圾债占比增加，企业面临再融资风险和违约风险。</p>
+                            <p class="mb-4"><strong class="text-primary-300">家庭杠杆:</strong> 美国家庭债务总额超过<span class="highlight-data">17万亿美元</span>，其中信用卡债务和汽车贷款违约率上升。学生贷款总额高达<span class="highlight-data">1.7万亿美元</span>。</p>
+
+                            <h3 class="sub-section-heading">比较与宏观经济层面 (Comparison & Macroeconomic Context)</h3>
+                            <p class="mb-2"><strong class="text-primary-300">企业杠杆:</strong> 美国企业债务，尤其非金融企业债务，相对于利润增长更快，部分行业（如商业地产）面临较大风险。</p>
+                            <p>虽然整体家庭债务水平有所改善，但中低收入家庭的信贷质量恶化，尤其体现在信用卡和次级车贷违约率上升。</p>
+                        </div>
+                    </details>
+
+                    <!-- Income Inequality -->
+                    <details class="data-card group" id="income-inequality">
+                        <summary class="collapsible-summary">
+                            <span>Income Inequality</span>
+                            <svg class="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="collapsible-content">
+                            <h3 class="sub-section-heading">导言与定义 (Introduction & Definition)</h3>
+                            <p class="mb-4">美国是西方发达国家中贫富差距最大的国家之一。</p>
+                            <p class="mb-4">最富有的<span class="highlight-data">1%</span>人口拥有全国约<span class="highlight-data">1/3</span>的财富，而底层<span class="highlight-data">50%</span>人口仅拥有约<span class="highlight-data">2.5%</span>的财富。</p>
+                            <p>基尼系数在<span class="highlight-data">0.4以上</span>，远高于OECD国家的平均水平。</p>
+
+                            <h3 class="sub-section-heading">比较与宏观经济层面 (Comparison & Macroeconomic Context)</h3>
+                            <p class="mb-4">美国贫富差距问题比欧洲和加拿大等发达国家更为突出。</p>
+                            <p>这不仅影响社会稳定，也限制了国内消费市场的增长潜力。</p>
+                        </div>
+                    </details>
+
+                    <!-- Manufacturing Decline -->
+                    <details class="data-card group" id="manufacturing-decline">
+                        <summary class="collapsible-summary">
+                            <span>Manufacturing Decline</span>
+                            <svg class="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="collapsible-content">
+                            <h3 class="sub-section-heading">导言与定义 (Introduction & Definition)</h3>
+                            <p class="mb-4">美国制造业占GDP的比重从1970年代的约<span class="highlight-data">25%</span>下降到目前的约<span class="highlight-data">11%</span>。</p>
+                            <p>这导致大量制造业岗位流失，削弱了供应链的韧性。</p>
+
+                            <h3 class="sub-section-heading">比较与宏观经济层面 (Comparison & Macroeconomic Context)</h3>
+                            <p class="mb-4">虽然美国政府试图通过《芯片法案》和《基础设施投资和就业法案》推动制造业回流，但全球供应链重构仍面临高成本和技术壁垒。</p>
+                            <p>与德国、日本等制造业强国相比，美国制造业在全球价值链中的高端优势正在减弱。</p>
+                        </div>
+                    </details>
+
+                    <!-- Aging Infrastructure -->
+                    <details class="data-card group" id="aging-infrastructure">
+                        <summary class="collapsible-summary">
+                            <span>Aging Infrastructure</span>
+                            <svg class="w-6 h-6 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div class="collapsible-content">
+                            <h3 class="sub-section-heading">导言与定义 (Introduction & Definition)</h3>
+                            <p class="mb-4">美国大部分基础设施（如道路、桥梁、电网、供水系统）建于20世纪中叶，已年久失修。</p>
+                            <p>根据美国土木工程师协会（ASCE）的报告，美国基础设施评级仅为<span class="highlight-data">C-</span>，未来十年需要投入数万亿美元进行更新和维护。</p>
+
+                            <h3 class="sub-section-heading">比较与宏观经济层面 (Comparison & Macroeconomic Context)</h3>
+                            <p class="mb-4">与其他发达国家相比，美国在基础设施现代化方面的投资相对不足。</p>
+                            <p>这不仅影响经济效率，也增加了应对气候变化等挑战的脆弱性。</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- Key Issue Identification with "美国斩杀线" Assessment -->
+            <section id="key-issue-identification" class="mb-16">
+                <h2 class="section-title">Key Issue Identification & '美国斩杀线' Assessment</h2>
+                <p class="text-lg text-gray-300 mb-8">
+                    本部分旨在通过对核心讨论议题的精准识别与相关经济数据的深度整合，确立并研判“美国斩杀线”的具体内涵及当前逼近程度。“美国斩杀线”定义为美国经济或金融体系所能承受的极端压力阈值，一旦突破，将引发系统性风险、严重市场动荡或经济衰退。
+                </p>
+
+                <div class="space-y-10">
+                    <!-- 1. 美国债务上限与财政稳定性：系统性风险的悬崖边缘 -->
+                    <div class="data-card border-l-4 border-primary-500 hover:border-primary-400" id="debt-ceiling">
+                        <h3 class="sub-section-heading flex items-center mb-4 text-white">
+                            <span class="text-primary-400 text-3xl font-extrabold mr-3">1.</span> 美国债务上限与财政稳定性：系统性风险的悬崖边缘
+                        </h3>
+                        <p class="mb-4">美国日益膨胀的国家债务及其反复出现的债务上限僵局，构成“斩杀线”的结构性引爆点。当前美国国债总额已突破历史新高，达到<span class="value-display">34万亿美元</span>，占GDP比重维持在<span class="value-display">123%以上</span>的高位。在特定财政关键日期前，短期国债收益率的异常波动，如<span class="value-display">1个月期与3个月期国债利差倒挂加剧</span>，以及美国主权信用违换（CDS）息差的阶段性走阔，均反映出市场对潜在债务危机的深切担忧。联邦政府预算赤字持续高企，最近一年占GDP比重<span class="value-display">约6.3%</span>，这不仅加剧了长期财政可持续性的质疑，也使得国债利息支出在联邦预算中的占比迅速攀升，预示着财政空间的进一步收窄。</p>
+                    </div>
+
+                    <!-- 2. 通货膨胀与货币政策转向：经济韧性的极限测试 -->
+                    <div class="data-card border-l-4 border-primary-500 hover:border-primary-400" id="inflation-monetary-policy">
+                        <h3 class="sub-section-heading flex items-center mb-4 text-white">
+                            <span class="text-primary-400 text-3xl font-extrabold mr-3">2.</span> 通货膨胀与货币政策转向：经济韧性的极限测试
+                        </h3>
+                        <p class="mb-4">持续的高通胀以及美联储为抑制通胀而采取的激进紧缩货币政策，正测试实体经济的承受极限，是“斩杀线”的另一重要维度。尽管消费者物价指数（CPI）和个人消费支出（PCE）通胀率已从峰值回落，但核心PCE仍持续高于美联储2%的目标区间<span class="value-display">3.2%左右</span>。为应对此局面，联邦基金利率已上调至<span class="value-display">5.25%-5.50%</span>，达到<span class="value-display">22年</span>来的最高水平。与此同时，量化紧缩（QT）政策持续推进，美联储资产负债表规模已缩减<span class="value-display">超过1万亿美元</span>，导致广义货币供应M2增速持续负增长。过高的借贷成本和流动性收紧，使得企业投资和消费者支出面临巨大压力，信贷扩张显著放缓，预示着经济增长的潜在放缓。</p>
+                    </div>
+
+                    <!-- 3. 银行业压力与金融传导风险：脆弱环节的放大效应 -->
+                    <div class="data-card border-l-4 border-primary-500 hover:border-primary-400" id="banking-pressure">
+                        <h3 class="sub-section-heading flex items-center mb-4 text-white">
+                            <span class="text-primary-400 text-3xl font-extrabold mr-3">3.</span> 银行业压力与金融传导风险：脆弱环节的放大效应
+                        </h3>
+                        <p class="mb-4">去年以来的区域性银行风险事件暴露了美国金融体系的脆弱性，银行信贷紧缩可能成为触发“斩杀线”的导火索。硅谷银行、签名银行等破产事件引发了短期内银行存款的大规模转移，特别是<span class="value-display">数千亿美元</span>的资金流向大型银行。美联储高级贷款官员意见调查（SLOOS）显示，信贷标准持续收紧，各类贷款需求显著下降，特别是商业房地产（CRE）领域面临巨大压力，<span class="value-display">办公楼空置率攀升至18.6%</span>，不良贷款率有上升趋势。尽管大型银行的资本充足率和流动性相对稳健，但区域性银行持续的存款压力和未实现损失（尤其是持有长期债券）构成了潜在的系统性风险。</p>
+                    </div>
+
+                    <!-- 4. 经济衰退前景与就业市场韧性：软着陆与硬着陆的临界点 -->
+                    <div class="data-card border-l-4 border-primary-500 hover:border-primary-400" id="recession-prospects">
+                        <h3 class="sub-section-heading flex items-center mb-4 text-white">
+                            <span class="text-primary-400 text-3xl font-extrabold mr-3">4.</span> 经济衰退前景与就业市场韧性：软着陆与硬着陆的临界点
+                        </h3>
+                        <p class="mb-4">经济硬着陆的可能性以及失业率的快速飙升，是判断是否触及“斩杀线”的核心指标。多项领先经济指标（LEI）持续录得负增长，预示经济衰退风险加剧。长期和短期国债收益率曲线的持续深度倒挂<span class="value-display">10年期与2年期利差扩大至-50个基点</span>，被视为经典的衰退信号。尽管非农就业数据在<span class="value-display">每月新增21.6万</span>表现出一定韧性，失业率维持在<span class="value-display">3.7%</span>的低位，但平均周薪增长放缓和企业招聘意愿下降，结合劳动参与率的停滞，表明劳动力市场可能正在经历结构性冷却。消费者信心指数<span class="value-display">密歇根大学消费者信心指数</span>波动性增大，反映了对未来经济前景的不确定性，消费支出的韧性面临考验。</p>
+                    </div>
+                </div>
+
+                <div class="data-card mt-10 p-8 text-center bg-gradient-to-br from-primary-900/60 to-background-900/60 border-primary-700/80 shadow-glow-md">
+                    <h3 class="text-2xl lg:text-3xl font-extrabold text-white mb-4">Conclusion</h3>
+                    <p class="text-lg text-gray-200 leading-relaxed max-w-4xl mx-auto">
+                        综合来看，美国债务水平的不可持续性、通胀顽固性与紧缩货币政策的滞后效应、银行业潜在的脆弱性以及日益增大的经济衰退风险相互交织，共同构成了“美国斩杀线”的潜在区间。当前各项经济指标正逼近或已触及历史警戒水平，例如，美国国债利息支出预计将很快超过国防开支，而家庭超额储蓄已基本耗尽，预示着经济缓冲垫的消失。对这些关键议题的持续监测与数据分析，对于预判美国经济是否会突破其承受极限至关重要。
+                    </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+            const nav = document.getElementById('main-navigation');
+            nav.classList.toggle('hidden');
+            nav.classList.toggle('block');
+            nav.classList.toggle('absolute');
+            nav.classList.toggle('inset-x-0');
+            nav.classList.toggle('top-full');
+            nav.classList.toggle('bg-card-900');
+            nav.classList.toggle('p-6');
+            nav.classList.toggle('shadow-lg');
+            nav.classList.toggle('z-20');
+        });
+
+        // Close mobile menu when a nav link is clicked
+        document.querySelectorAll('#main-navigation a').forEach(link => {
+            link.addEventListener('click', () => {
+                const nav = document.getElementById('main-navigation');
+                if (window.innerWidth < 1024) { // Only close on mobile (lg breakpoint is 1024px)
+                    nav.classList.add('hidden');
+                    nav.classList.remove('block', 'absolute', 'inset-x-0', 'top-full', 'bg-card-900', 'p-6', 'shadow-lg', 'z-20');
+                }
+            });
+        });
+
+        // Intersection Observer for active navigation links
+        const sections = document.querySelectorAll('main section[id], main details[id]'); // Observe all main sections and collapsible details
+        const navLinks = document.querySelectorAll('#main-navigation a');
+
+        const observer = new IntersectionObserver((entries) => {
+            let currentActiveLinkId = null;
+
+            // Find the topmost intersecting section/details that's mostly in view
+            // Sort by bounding client rect top to find the one closest to the top of the viewport
+            // Filter entries to only consider those whose top is within a reasonable range (e.g., above 20% from top)
+            const visibleEntries = entries.filter(entry => {
+                return entry.isIntersecting && entry.boundingClientRect.top < window.innerHeight * 0.35 && entry.boundingClientRect.bottom > window.innerHeight * 0.1;
+            }).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+            if (visibleEntries.length > 0) {
+                currentActiveLinkId = visibleEntries[0].target.id;
+            } else {
+                 // Fallback: If no section is intersecting within the tight threshold, check if any section is above the threshold
+                const allSectionsAbove = Array.from(sections).filter(sec => sec.getBoundingClientRect().top < window.innerHeight * 0.1).sort((a,b) => b.getBoundingClientRect().top - a.getBoundingClientRect().top);
+                if (allSectionsAbove.length > 0) {
+                    currentActiveLinkId = allSectionsAbove[0].id;
+                }
+            }
+
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (currentActiveLinkId && link.getAttribute('href') === '#' + currentActiveLinkId) {
+                    link.classList.add('active');
+                }
+            });
+        }, {
+            rootMargin: '-25% 0px -70% 0px' // Adjust these values as needed to control when links become active
+        });
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
