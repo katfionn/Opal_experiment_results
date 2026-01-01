@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis of "美国斩杀线"</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-bg': '#0A0C16', // Deep, dark blue-grey for background
+                        'dark-card': '#14182B', // Slightly lighter dark for cards, subtle blue tint
+                        'accent-blue': '#00BFFF', // Electric blue for accents
+                        'accent-red': '#FF4500', // Orange-red for "kill line" or warnings
+                        'text-light': '#E0E7FF', // Soft white for primary text
+                        'text-muted': '#AAB2C9', // Muted grey for secondary text
+                    },
+                    fontFamily: {
+                        display: ['"Outfit"', 'sans-serif'], // For titles
+                        body: ['"Inter"', 'sans-serif'], // For paragraphs and lists
+                    },
+                    keyframes: {
+                        gradientShift: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '100%': { backgroundPosition: '100% 50%' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeInProgress: { // For progress bars
+                            '0%': { width: '0' },
+                            '100%': { width: 'var(--progress-width)' },
+                        }
+                    },
+                    animation: {
+                        gradientShift: 'gradientShift 15s ease infinite alternate',
+                        fadeInUp: 'fadeInUp 0.6s ease-out forwards',
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0A0C16; /* Fallback for browsers not supporting Tailwind CSS or initial load */
+            background: linear-gradient(-45deg, #0A0C16, #14182B, #0A0C16, #001020);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite alternate;
+            font-family: 'Inter', sans-serif;
+            color: #E0E7FF;
+            line-height: 1.6;
+        }
+        .text-gradient {
+            background: linear-gradient(45deg, #00BFFF, #8A2BE2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background: rgba(20, 24, 43, 0.8); /* Semi-transparent dark card */
+            backdrop-filter: blur(10px); /* Glassmorphism effect */
+            border: 1px solid rgba(0, 127, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+        .card:hover {
+            border-color: rgba(0, 127, 255, 0.6);
+            box-shadow: 0 8px 40px rgba(0, 191, 255, 0.4);
+            transform: translateY(-5px);
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top left, rgba(0, 191, 255, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at bottom right, rgba(138, 43, 226, 0.15) 0%, transparent 40%);
+            z-index: -1;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #00BFFF, #8A2BE2);
+            margin-top: 10px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 2px;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(0, 191, 255, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00BFFF, #8A2BE2);
+            border-radius: 4px;
+            animation: fadeInProgress 1s ease-out forwards;
+        }
+        /* Mobile adjustments for responsiveness */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2rem;
+            }
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            /* Adjust timeline for mobile */
+            .relative.md\:flex.items-center.w-full {
+                flex-direction: column;
+            }
+            .md\:w-1\/2 {
+                width: 100%;
+                padding-left: 0;
+                padding-right: 0;
+                text-align: left; /* Align text left on mobile */
+            }
+            .md\:order-1, .md\:order-2 {
+                order: initial;
+            }
+            .absolute.left-1\/2 {
+                left: 10px; /* Shift timeline line to left */
+                transform: none;
+            }
+            .md\:w-1\/2.pl-8, .md\:w-1\/2.pr-8 {
+                padding-left: 0.5rem; /* Add some padding */
+                padding-right: 0.5rem;
+            }
+            .md\:w-1\/2.pl-8.md\:order-2.order-1,
+            .md\:w-1\/2.pr-8.md\:order-1.order-1 {
+                justify-content: flex-start; /* Align dots left on mobile */
+                padding-left: 0;
+            }
+            .md\:w-1\/2.pl-8.md\:order-2.order-2,
+            .md\:w-1\/2.pr-8.md\:order-1.order-2 {
+                text-align: left; /* Ensure text alignment for cards */
+                padding-left: 2.5rem; /* Indent card to the right of line */
+            }
+            .w-8.h-8.rounded-full {
+                position: absolute;
+                left: 0px; /* Position dot on the left line */
+                top: 0;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="font-body text-text-light min-h-screen antialiased">
+    <div class="relative min-h-screen overflow-hidden">
+        <!-- Hero Section -->
+        <header class="hero-section relative py-20 px-4 md:px-8 text-center overflow-hidden">
+            <h1 class="font-display text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-gradient animate-fadeInUp" style="animation-delay: 0.2s;">
+                Analysis of "美国斩杀线" (Měiguó Zhǎnshā Xiàn) in Chinese Public Discourse
+            </h1>
+            <p class="max-w-3xl mx-auto text-xl text-text-muted mb-8 animate-fadeInUp" style="animation-delay: 0.4s;">
+                Exploring the potent metaphor of "America's Kill Line" and its profound implications
+                for China's technological, economic, and strategic development.
+            </p>
+        </header>
+
+        <main class="container mx-auto px-4 md:px-8 py-12 space-y-16">
+
+            <!-- 1. Introduction: Defining '美国斩杀线' -->
+            <section class="animate-fadeInUp" style="animation-delay: 0.6s;">
+                <h2 class="section-title text-3xl md:text-4xl font-display font-bold text-center mb-10 text-text-light">Defining '美国斩杀线'</h2>
+                <div class="card p-8 rounded-2xl">
+                    <p class="mb-6 text-lg">
+                        The term <span class="text-accent-red font-semibold">"美国斩杀线" (Měiguó Zhǎnshā Xiàn)</span>, translating to "America's Kill Line" or "America's Slaughter Line," is a potent and metaphorical phrase that has gained significant traction in Chinese public discourse over the past 18-24 months. It represents the perception among a substantial portion of the Chinese public that the United States is establishing critical thresholds or barriers intended to impede China's technological, economic, and strategic development.
+                    </p>
+                    <h3 class="font-display text-2xl font-semibold mb-4 text-accent-blue">Key Interpretations:</h3>
+                    <ul class="space-y-3 pl-5 list-disc list-outside text-text-light">
+                        <li><span class="font-semibold text-text-light">Critical Threshold for US Retaliation:</span> A point where perceived Chinese actions or advancements become unacceptable to the US, leading to a strong, potentially "fatal" response.</li>
+                        <li><span class="font-semibold text-text-light">US Strategic Suppression Line:</span> A deliberate US policy boundary designed to curb China's rise, particularly in areas challenging US technological, economic, or military dominance.</li>
+                        <li><span class="font-semibold text-text-light">"Game Over" Line:</span> Analogous to a gaming term, implying a point where China can be decisively defeated by the US.</li>
+                        <li><span class="font-semibold text-text-light">Indicator of US Hegemonic Intent:</span> Evidence of the US's determination to maintain global hegemony and prevent any nation from significantly challenging its power.</li>
+                        <li><span class="font-semibold text-text-light">Unilateral and Arbitrary Line:</span> Perceived as a line unilaterally drawn by the US based on its own interests and perceptions, applied arbitrarily and without international consensus.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 2. Key Connotations and Associated Scenarios -->
+            <section class="animate-fadeInUp" style="animation-delay: 0.8s;">
+                <h2 class="section-title text-3xl md:text-4xl font-display font-bold text-center mb-10 text-text-light">Key Connotations & Scenarios</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L22 17M12 2L12 17M19.071 4.929a10 10 0 11-14.142 0M2.929 19.071a10 10 0 1114.142 0"></path></svg>
+                            Technological Blockade
+                        </h3>
+                        <p class="text-text-muted text-sm mb-4">
+                            US efforts to restrict China's access to advanced technologies, preventing technological self-sufficiency.
+                        </p>
+                        <ul class="text-sm space-y-2 text-text-light flex-grow">
+                            <li><strong class="text-accent-blue">Scenarios:</strong></li>
+                            <li class="pl-4">Advanced Semiconductor Industry</li>
+                            <li class="pl-4">Huawei and 5G Technology</li>
+                            <li class="pl-4">Artificial Intelligence (AI) Development</li>
+                        </ul>
+                    </div>
+
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1L12 21l-7.401-14C4.92 8.402 6.39 8 8 8zm0 0V5.5l1.5-1.5"></path></svg>
+                            Economic Sanctions
+                        </h3>
+                        <p class="text-text-muted text-sm mb-4">
+                            Using economic tools to pressure or isolate China, disrupt its supply chains, or limit global influence.
+                        </p>
+                        <ul class="text-sm space-y-2 text-text-light flex-grow">
+                            <li><strong class="text-accent-blue">Scenarios:</strong></li>
+                            <li class="pl-4">Investment restrictions & "de-risking"</li>
+                            <li class="pl-4">Disruption of supply chains</li>
+                            <li class="pl-4">Targeted industry sanctions</li>
+                        </ul>
+                    </div>
+
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 8a8 8 0 01-8-8c0-2.887 1.408-5.467 3.54-7.062M12 21a8 8 0 008-8m-8 8a8 8 0 01-8-8m8 0C12 7.087 10.592 4.507 8.46 2.938M12 13a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                            Military Aggression
+                        </h3>
+                        <p class="text-text-muted text-sm mb-4">
+                            Potential US military responses or red lines in geopolitical hotspots.
+                        </p>
+                        <ul class="text-sm space-y-2 text-text-light flex-grow">
+                            <li><strong class="text-accent-blue">Scenarios:</strong></li>
+                            <li class="pl-4">Taiwan Issue (military action)</li>
+                            <li class="pl-4">South China Sea assertive actions</li>
+                            <li class="pl-4">Military Modernization & Dual-Use Tech</li>
+                        </ul>
+                    </div>
+
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2m20 0h-3m-11.414-1.146a2 2 0 10-2.828-2.828M13 15h1m-1 4h1m-1-5h1m-1-4h1m-1-4h1M4 14h1m-1 4h1m-1-5h1m-1-4h1M6 20v-2a3 3 0 00-3-3H2"></path></svg>
+                            Political/Geopolitical Red Lines
+                        </h3>
+                        <p class="text-text-muted text-sm mb-4">
+                            US intervention or strong reactions to Chinese political actions.
+                        </p>
+                        <ul class="text-sm space-y-2 text-text-light flex-grow">
+                            <li><strong class="text-accent-blue">Scenarios:</strong></li>
+                            <li class="pl-4">Human rights issues</li>
+                            <li class="pl-4">Challenges to international norms</li>
+                            <li class="pl-4">Regional power balances</li>
+                        </ul>
+                    </div>
+
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                            Supply Chain Control
+                        </h3>
+                        <p class="text-text-muted text-sm mb-4">
+                            US actions aimed at preventing China from dominating critical global supply chains.
+                        </p>
+                        <ul class="text-sm space-y-2 text-text-light flex-grow">
+                            <li><strong class="text-accent-blue">Scenarios:</strong></li>
+                            <li class="pl-4">Critical Mineral Supply Chains (Rare Earths)</li>
+                            <li class="pl-4">"Belt and Road Initiative" (BRI) expansion</li>
+                            <li class="pl-4">Weaponization of supply chains</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Evolution of Understanding and Reactions -->
+            <section class="animate-fadeInUp" style="animation-delay: 1.0s;">
+                <h2 class="section-title text-3xl md:text-4xl font-display font-bold text-center mb-10 text-text-light">Evolution of Understanding & Reactions</h2>
+                <div class="relative max-w-5xl mx-auto">
+                    <!-- Timeline vertical line -->
+                    <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-accent-blue to-purple-700 rounded-full hidden md:block"></div>
+
+                    <div class="space-y-12 md:space-y-24">
+                        <!-- Initial Emergence -->
+                        <div class="relative flex flex-col md:flex-row items-center w-full">
+                            <div class="md:w-1/2 pr-8 text-right md:order-1 order-2 w-full">
+                                <div class="card p-6 rounded-xl hover:border-accent-blue hover:shadow-lg">
+                                    <h3 class="font-display text-xl font-semibold mb-2 text-accent-blue">Initial Emergence</h3>
+                                    <p class="text-sm text-text-muted mb-3">Mid-2022 to Early 2023</p>
+                                    <ul class="list-disc list-inside text-sm space-y-1">
+                                        <li><strong class="text-text-light">Trigger:</strong> Oct 2022 US export controls on chips.</li>
+                                        <li><strong class="text-text-light">Understanding:</strong> Primarily technological blockades.</li>
+                                        <li><strong class="text-text-light">Reactions:</strong> Anger, defiance, calls for self-reliance.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="md:w-1/2 pl-8 md:order-2 order-1 flex justify-center items-center w-full">
+                                <div class="w-8 h-8 rounded-full bg-accent-blue border-4 border-dark-card shadow-lg flex items-center justify-center -mb-4 md:mb-0">
+                                    <span class="text-white text-xs font-bold">1</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Broadening Scope -->
+                        <div class="relative flex flex-col md:flex-row items-center w-full">
+                            <div class="md:w-1/2 pl-8 text-left md:order-2 order-2 w-full">
+                                <div class="card p-6 rounded-xl hover:border-accent-blue hover:shadow-lg">
+                                    <h3 class="font-display text-xl font-semibold mb-2 text-accent-blue">Broadening Scope</h3>
+                                    <p class="text-sm text-text-muted mb-3">Early 2023 to Early 2024</p>
+                                    <ul class="list-disc list-inside text-sm space-y-1">
+                                        <li><strong class="text-text-light">Expansion:</strong> US investment restrictions, "de-risking."</li>
+                                        <li><strong class="text-text-light">Understanding:</strong> Economic decoupling, geopolitical containment.</li>
+                                        <li><strong class="text-text-light">Reactions:</strong> Heightened pressure, "strategic patience," "dual circulation."</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="md:w-1/2 pr-8 md:order-1 order-1 flex justify-center items-center w-full">
+                                <div class="w-8 h-8 rounded-full bg-accent-blue border-4 border-dark-card shadow-lg flex items-center justify-center -mb-4 md:mb-0">
+                                    <span class="text-white text-xs font-bold">2</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current State -->
+                        <div class="relative flex flex-col md:flex-row items-center w-full">
+                            <div class="md:w-1/2 pr-8 text-right md:order-1 order-2 w-full">
+                                <div class="card p-6 rounded-xl hover:border-accent-blue hover:shadow-lg">
+                                    <h3 class="font-display text-xl font-semibold mb-2 text-accent-blue">Current State</h3>
+                                    <p class="text-sm text-text-muted mb-3">Early 2024 - Present</p>
+                                    <ul class="list-disc list-inside text-sm space-y-1">
+                                        <li><strong class="text-text-light">Interpretation:</strong> Normalized, persistent, multi-faceted challenge.</li>
+                                        <li><strong class="text-text-light">Focus:</strong> Building enduring capabilities and resilience.</li>
+                                        <li><strong class="text-text-light">Reactions:</strong> Emphasis on resilience, innovation, domestic consumption.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="md:w-1/2 pl-8 md:order-2 order-1 flex justify-center items-center w-full">
+                                <div class="w-8 h-8 rounded-full bg-accent-blue border-4 border-dark-card shadow-lg flex items-center justify-center -mb-4 md:mb-0">
+                                    <span class="text-white text-xs font-bold">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Information Sources Shaping Discourse -->
+            <section class="animate-fadeInUp" style="animation-delay: 1.2s;">
+                <h2 class="section-title text-3xl md:text-4xl font-display font-bold text-center mb-10 text-text-light">Information Sources Shaping Discourse</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-3m-2 4H5m5-4v2m0 4h2"></path></svg>
+                            State Media
+                        </h3>
+                        <p class="text-sm text-text-muted mb-4">
+                            (e.g., Xinhua, People's Daily, CCTV) Consistently portrays '美国斩杀线' as an aggressive, hegemonic US strategy.
+                        </p>
+                    </div>
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            Social Media Discourse
+                        </h3>
+                        <p class="text-sm text-text-muted mb-4">
+                            (Weibo, WeChat, Douyin) Amplifies state narratives with nationalistic and emotional sentiment.
+                        </p>
+                    </div>
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"></path></svg>
+                            Expert Commentary
+                        </h3>
+                        <p class="text-sm text-text-muted mb-4">
+                            Within China, aligns with official narratives, providing deeper strategic analysis and justification.
+                        </p>
+                    </div>
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V8m-6 11h3m-3 0h3"></path></svg>
+                            Online Forums
+                        </h3>
+                        <p class="text-sm text-text-muted mb-4">
+                            (Zhihu, Tieba) Zhihu for analytical discussions, Tieba for grassroots, passionate commentary.
+                        </p>
+                    </div>
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Official Statements
+                        </h3>
+                        <p class="text-sm text-text-muted mb-4">
+                            (Ministry of Foreign Affairs) Formal and firm, condemning the concept and warning against its implementation.
+                        </p>
+                    </div>
+                    <div class="card p-6 rounded-xl flex flex-col items-start hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-xl font-semibold mb-3 text-accent-blue flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            Peer Discussions
+                        </h3>
+                        <p class="text-sm text-text-muted mb-4">
+                            Across platforms, reinforcing narratives and personal interpretations, spreading emotional sentiment.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Predominant Emotions and Attitudes -->
+            <section class="animate-fadeInUp" style="animation-delay: 1.4s;">
+                <h2 class="section-title text-3xl md:text-4xl font-display font-bold text-center mb-10 text-text-light">Predominant Emotions & Attitudes</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Emotions -->
+                    <div class="card p-8 rounded-2xl">
+                        <h3 class="font-display text-2xl font-semibold mb-6 text-accent-blue">Predominant Emotions</h3>
+                        <div class="space-y-6">
+                            <div class="relative group">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-semibold text-text-light">Anger</span>
+                                    <span class="text-text-muted">45%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="--progress-width: 45%;"></div>
+                                </div>
+                                <p class="text-sm text-text-muted mt-2 hidden group-hover:block transition-all duration-300">
+                                    High, directed at perceived US attempts to suppress China's development.
+                                </p>
+                            </div>
+                            <div class="relative group">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-semibold text-text-light">Defiance</span>
+                                    <span class="text-text-muted">35%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="--progress-width: 35%;"></div>
+                                </div>
+                                <p class="text-sm text-text-muted mt-2 hidden group-hover:block transition-all duration-300">
+                                    Strong, interwoven with patriotism, rejection of external pressure.
+                                </p>
+                            </div>
+                            <div class="relative group">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-semibold text-text-light">Vigilance</span>
+                                    <span class="text-text-muted">25%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="--progress-width: 25%;"></div>
+                                </div>
+                                <p class="text-sm text-text-muted mt-2 hidden group-hover:block transition-all duration-300">
+                                    High, stressing constant monitoring and proactive preparation.
+                                </p>
+                            </div>
+                            <div class="relative group">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-semibold text-text-light">Concern</span>
+                                    <span class="text-text-muted">15%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="--progress-width: 15%;"></div>
+                                </div>
+                                <p class="text-sm text-text-muted mt-2 hidden group-hover:block transition-all duration-300">
+                                    Moderate, focusing on potential economic repercussions or escalation.
+                                </p>
+                            </div>
+                            <div class="relative group">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-semibold text-text-light">Fear</span>
+                                    <span class="text-text-muted">&lt;10%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="--progress-width: 8%;"></div>
+                                </div>
+                                <p class="text-sm text-text-muted mt-2 hidden group-hover:block transition-all duration-300">
+                                    Moderate, often sublimated or expressed indirectly as "deep concern."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attitudes -->
+                    <div class="card p-8 rounded-2xl">
+                        <h3 class="font-display text-2xl font-semibold mb-6 text-accent-blue">Predominant Attitudes</h3>
+                        <div class="space-y-6">
+                            <div class="relative group">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-semibold text-text-light">Resistance</span>
+                                    <span class="text-text-muted">60%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="--progress-width: 60%;"></div>
+                                </div>
+                                <p class="text-sm text-text-muted mt-2 hidden group-hover:block transition-all duration-300">
+                                    Very strong, advocating for robust countermeasures and strategic autonomy.
+                                </p>
+                            </div>
+                            <div class="relative group">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-semibold text-text-light">Fear</span>
+                                    <span class="text-text-muted">10%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="--progress-width: 10%;"></div>
+                                </div>
+                                <p class="text-sm text-text-muted mt-2 hidden group-hover:block transition-all duration-300">
+                                    Moderate, often sublimated or expressed indirectly as warnings.
+                                </p>
+                            </div>
+                            <div class="relative group">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-semibold text-text-light">Acceptance</span>
+                                    <span class="text-text-muted">&lt;1%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="--progress-width: 1%;"></div>
+                                </div>
+                                <p class="text-sm text-text-muted mt-2 hidden group-hover:block transition-all duration-300">
+                                    Virtually non-existent in public discourse.
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-text-muted mt-8">
+                            *Percentages are estimates based on qualitative analysis of discourse.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Contextualization within Broader Narratives -->
+            <section class="animate-fadeInUp" style="animation-delay: 1.6s;">
+                <h2 class="section-title text-3xl md:text-4xl font-display font-bold text-center mb-10 text-text-light">Contextualization within Broader Narratives</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="card p-8 rounded-2xl flex flex-col hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-2xl font-semibold mb-6 text-accent-blue flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 10h.01M19 10H5a2 2 0 00-2 2v6a2 2 0 002 2h14a2 2 0 002-2v-6a2 2 0 00-2-2zm-6 0h.01M11 10h.01M12 4a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V6a2 2 0 00-2-2h-2z"></path></svg>
+                            US-China Relations
+                        </h3>
+                        <ul class="space-y-4 text-lg text-text-light flex-grow">
+                            <li><strong class="text-accent-blue">"Competition-Confrontation" Narrative:</strong> Reinforces the idea of strategic competition, with the US actively containing China.</li>
+                            <li><strong class="text-accent-blue">"New Cold War" Mentality:</strong> Contributes to a perception of the US attempting to establish a technological and economic "iron curtain."</li>
+                            <li><strong class="text-accent-blue">Perceived US Hostility:</strong> A powerful symbol driving public sentiment towards a hardened stance against US policy.</li>
+                            <li><strong class="text-accent-blue">Justification for Countermeasures:</strong> Used to justify China's assertive foreign policy and indigenous innovation.</li>
+                        </ul>
+                    </div>
+                    <div class="card p-8 rounded-2xl flex flex-col hover:border-accent-blue hover:shadow-lg">
+                        <h3 class="font-display text-2xl font-semibold mb-6 text-accent-blue flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L22 17M12 2L12 17M19.071 4.929a10 10 0 11-14.142 0M2.929 19.071a10 10 0 1114.142 0"></path></svg>
+                            China's National Development
+                        </h3>
+                        <ul class="space-y-4 text-lg text-text-light flex-grow">
+                            <li><strong class="text-accent-blue">Urgency for Technological Self-Sufficiency:</strong> Motivator for accelerating technological independence.</li>
+                            <li><strong class="text-accent-blue">Reinforcing "Dual Circulation":</strong> Supports emphasis on domestic demand and internal technological capabilities.</li>
+                            <li><strong class="text-accent-blue">National Unity and Resilience:</strong> Evokes shared national challenge, fostering unity against external aggression.</li>
+                            <li><strong class="text-accent-blue">Legitimacy of State Intervention:</strong> Provides public support for increased state intervention in strategic industries.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Conclusion -->
+            <section class="animate-fadeInUp" style="animation-delay: 1.8s;">
+                <h2 class="section-title text-3xl md:text-4xl font-display font-bold text-center mb-10 text-text-light">Conclusion</h2>
+                <div class="card p-8 rounded-2xl text-center">
+                    <p class="text-xl leading-relaxed text-text-light">
+                        In summary, <span class="text-accent-red font-semibold">"美国斩杀线"</span> has evolved from a specific reference to technological blockades to a broader symbol of comprehensive US containment efforts. It vividly captures public anxieties and frustrations while simultaneously galvanizing calls for national self-reliance, unity, and strategic resolve in the face of what is perceived as an existential challenge to China's development path. It has become a crucial element in shaping both public understanding of US-China relations and the internal discourse on China's national development strategy.
+                    </p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</body>
+</html>
