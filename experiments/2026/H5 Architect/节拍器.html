@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metronome Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Inter:wght@400;600&display=swap');
+        
+        /* Custom scrollbar for a more integrated look */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(74, 222, 128, 0.4); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(74, 222, 128, 0.6); }
+
+        /* Custom styles for sliders */
+        input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; cursor: pointer; }
+        input[type="range"]::-webkit-slider-runnable-track { background: rgba(255, 255, 255, 0.1); height: 4px; border-radius: 2px; }
+        input[type="range"]::-moz-range-track { background: rgba(255, 255, 255, 0.1); height: 4px; border-radius: 2px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -6px; height: 16px; width: 16px; background-color: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80; transition: transform 0.2s ease; }
+        input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.2); }
+        input[type="range"]::-moz-range-thumb { height: 16px; width: 16px; background-color: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80; border: none; transition: transform 0.2s ease; }
+        input[type="range"]:active::-moz-range-thumb { transform: scale(1.2); }
+
+        /* Beat pulse animation */
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+        .beat-pulse { animation: pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1); }
+
+        @keyframes beat-visual-accent {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 0.15; }
+            100% { opacity: 0; transform: scale(1.2); }
+        }
+        @keyframes beat-visual-normal {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 0.08; }
+            100% { opacity: 0; transform: scale(1.0); }
+        }
+        .visual-pulse-accent { animation: beat-visual-accent 0.5s ease-out; }
+        .visual-pulse-normal { animation: beat-visual-normal 0.5s ease-out; }
+
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Orbitron', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-dark': '#0a0a0a',
+                        'brand-accent': '#4ade80', // vibrant green
+                        'brand-secondary': '#22d3ee', // cyan
+                        'brand-tertiary': '#f472b6', // pink
+                    },
+                    boxShadow: {
+                        'glow-accent': '0 0 15px rgba(74, 222, 128, 0.6), 0 0 5px rgba(74, 222, 128, 0.8)',
+                        'glow-secondary': '0 0 15px rgba(34, 211, 238, 0.6), 0 0 5px rgba(34, 211, 238, 0.8)',
+                        'glow-tertiary': '0 0 15px rgba(244, 114, 182, 0.6), 0 0 5px rgba(244, 114, 182, 0.8)',
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+<body class="bg-brand-dark font-sans antialiased text-gray-300 overflow-hidden">
+    <div class="relative min-h-screen w-full flex items-center justify-center p-4 bg-grid-white/[0.05]">
+        <!-- Background Visualizer -->
+        <div id="beat-visualizer" class="absolute inset-0 m-auto w-full h-full bg-brand-accent rounded-full pointer-events-none opacity-0"></div>
+        
+        <main class="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center gap-6">
+
+            <!-- BPM Display -->
+            <div id="bpm-display-wrapper" class="relative w-64 h-64 md:w-80 md:h-80 flex flex-col items-center justify-center bg-black/30 backdrop-blur-xl border border-white/10 rounded-full transition-all duration-300">
+                <div class="absolute inset-0 border-2 border-brand-accent rounded-full animate-spin" style="animation-duration: 20s; animation-direction: reverse;"></div>
+                <div class="absolute inset-2 border border-brand-accent/50 rounded-full animate-spin" style="animation-duration: 15s;"></div>
+                <span class="font-display text-7xl md:text-9xl font-bold tracking-tighter text-white" id="bpm-display">120</span>
+                <span class="text-lg font-semibold text-brand-accent tracking-widest">BPM</span>
+            </div>
+
+            <!-- Play/Pause Button -->
+            <button id="play-pause-btn" class="w-24 h-24 flex items-center justify-center rounded-full bg-brand-accent text-brand-dark shadow-glow-accent hover:bg-white hover:shadow-lg hover:shadow-white/50 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-brand-accent/50">
+                <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 hidden" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" /></svg>
+            </button>
+            
+            <!-- Controls Grid -->
+            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Tempo Controls -->
+                <div class="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col gap-4">
+                    <h3 class="font-semibold text-white">Tempo</h3>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium w-12">40</span>
+                        <input type="range" id="bpm-slider" min="40" max="240" value="120" class="flex-grow">
+                        <span class="text-sm font-medium w-12 text-right">240</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <input type="number" id="bpm-input" min="40" max="240" value="120" class="w-24 text-center bg-white/5 border border-white/10 rounded-md py-1 px-2 focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                        <button id="tap-tempo-btn" class="flex-grow py-2 px-4 rounded-md bg-white/10 border border-white/10 hover:bg-white/20 transition-colors duration-200">Tap Tempo</button>
+                    </div>
+                </div>
+
+                <!-- Volume Control -->
+                <div class="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col gap-4">
+                    <h3 class="font-semibold text-white">Volume</h3>
+                     <div class="flex items-center gap-4 h-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-full">
+                    </div>
+                </div>
+                
+                <!-- Time Signature -->
+                <div class="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col gap-4">
+                    <h3 class="font-semibold text-white">Time Signature</h3>
+                    <div class="grid grid-cols-4 gap-2" id="time-signature-group">
+                        <button data-value="2/4" class="control-btn">2/4</button>
+                        <button data-value="3/4" class="control-btn">3/4</button>
+                        <button data-value="4/4" class="control-btn active shadow-glow-secondary">4/4</button>
+                        <button data-value="6/8" class="control-btn">6/8</button>
+                    </div>
+                </div>
+
+                <!-- Subdivisions -->
+                <div class="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col gap-4">
+                    <h3 class="font-semibold text-white">Subdivision</h3>
+                    <div class="grid grid-cols-4 gap-2" id="subdivision-group">
+                         <button data-value="1" class="control-btn active shadow-glow-tertiary">
+                            <svg class="w-6 h-6 mx-auto" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14.21a2 2 0 1 0-2-2 2 2 0 0 0 2 2zm-2-4.83v-5a1 1 0 1 1 2 0v5a1 1 0 1 1-2 0z"/></svg>
+                         </button>
+                         <button data-value="2" class="control-btn">
+                            <svg class="w-6 h-6 mx-auto" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 7.17V2.5a.5.5 0 0 0-1 0v4.29a2.5 2.5 0 1 0 1 .38zM15 12a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zM9.5 7.17V2.5a.5.5 0 0 0-1 0v4.29a2.5 2.5 0 1 0 1 .38zM7 12a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/></svg>
+                         </button>
+                         <button data-value="3" class="control-btn">
+                             <svg class="w-6 h-6 mx-auto" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9.38V5.5a.5.5 0 0 0-1 0v3.47a2 2 0 1 0 1 .41zM10.5 4h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1 0-1zm-.15 9.17a2 2 0 1 0 .3 0v-3.79a2 2 0 1 0-.3 0zM15 9.38V5.5a.5.5 0 0 0-1 0v3.47a2 2 0 1 0 1 .41z"/></svg>
+                         </button>
+                         <button data-value="4" class="control-btn">
+                             <svg class="w-6 h-6 mx-auto" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 7.17V2.5a.5.5 0 0 0-1 0v4.29a2.5 2.5 0 1 0 1 .38zM15 12a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm-6-2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm-2-2.33V2.5a.5.5 0 0 0-1 0v4.29a2.5 2.5 0 1 0 1 .38z"/></svg>
+                         </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- STATE ---
+            let isPlaying = false;
+            let bpm = 120;
+            let beatsPerMeasure = 4;
+            let subdivision = 1;
+            let volume = 0.8;
+            
+            // --- WEB AUDIO API SETUP ---
+            let audioContext;
+            let gainNode;
+            let nextNoteTime = 0.0;
+            let scheduleAheadTime = 0.1;
+            let current16thNote = 0;
+            let schedulerTimerID;
+            let tapTimes = [];
+            
+            // --- DOM ELEMENTS ---
+            const bpmDisplay = document.getElementById('bpm-display');
+            const bpmDisplayWrapper = document.getElementById('bpm-display-wrapper');
+            const beatVisualizer = document.getElementById('beat-visualizer');
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+            const bpmSlider = document.getElementById('bpm-slider');
+            const bpmInput = document.getElementById('bpm-input');
+            const tapTempoBtn = document.getElementById('tap-tempo-btn');
+            const volumeSlider = document.getElementById('volume-slider');
+            const timeSignatureGroup = document.getElementById('time-signature-group');
+            const subdivisionGroup = document.getElementById('subdivision-group');
+
+            // --- UI UPDATE FUNCTIONS ---
+            const updateBpmUI = (newBpm) => {
+                bpmDisplay.textContent = newBpm;
+                bpmSlider.value = newBpm;
+                bpmInput.value = newBpm;
+            };
+
+            const togglePlayState = (playing) => {
+                isPlaying = playing;
+                playIcon.classList.toggle('hidden', isPlaying);
+                pauseIcon.classList.toggle('hidden', !isPlaying);
+                playPauseBtn.classList.toggle('bg-white', isPlaying);
+                playPauseBtn.classList.toggle('text-black', isPlaying);
+                playPauseBtn.classList.toggle('bg-brand-accent', !isPlaying);
+                playPauseBtn.classList.toggle('text-brand-dark', !isPlaying);
+                playPauseBtn.classList.toggle('shadow-glow-accent', !isPlaying);
+                playPauseBtn.classList.toggle('shadow-white/50', isPlaying);
+            };
+
+            const setActiveButton = (group, value) => {
+                group.querySelectorAll('.control-btn').forEach(btn => {
+                    btn.classList.remove('active', 'shadow-glow-secondary', 'shadow-glow-tertiary');
+                    if (btn.dataset.value === value) {
+                        btn.classList.add('active');
+                        if (group === timeSignatureGroup) btn.classList.add('shadow-glow-secondary');
+                        if (group === subdivisionGroup) btn.classList.add('shadow-glow-tertiary');
+                    }
+                });
+            };
+
+            // --- AUDIO LOGIC ---
+            function initAudio() {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    gainNode = audioContext.createGain();
+                    gainNode.gain.value = volume;
+                    gainNode.connect(audioContext.destination);
+                }
+            }
+            
+            function playClick(time, isAccent) {
+                const osc = audioContext.createOscillator();
+                const clickGain = audioContext.createGain();
+                
+                osc.connect(clickGain);
+                clickGain.connect(gainNode);
+                
+                osc.frequency.value = isAccent ? 1200 : 880;
+                clickGain.gain.setValueAtTime(1, time);
+                clickGain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+                
+                osc.start(time);
+                osc.stop(time + 0.05);
+            }
+
+            function scheduleNote(beatNumber, time) {
+                const isAccent = beatNumber % beatsPerMeasure === 0;
+                playClick(time, isAccent);
+                
+                // Visual feedback
+                setTimeout(() => {
+                    bpmDisplayWrapper.classList.remove('beat-pulse');
+                    void bpmDisplayWrapper.offsetWidth; // Trigger reflow
+                    bpmDisplayWrapper.classList.add('beat-pulse');
+                    
+                    beatVisualizer.classList.remove('visual-pulse-accent', 'visual-pulse-normal');
+                    void beatVisualizer.offsetWidth;
+                    beatVisualizer.classList.add(isAccent ? 'visual-pulse-accent' : 'visual-pulse-normal');
+                }, (time - audioContext.currentTime) * 1000);
+            }
+
+            function nextNote() {
+                const secondsPerBeat = 60.0 / bpm;
+                nextNoteTime += (1 / subdivision) * secondsPerBeat;
+                current16thNote++;
+                if (current16thNote == (beatsPerMeasure * subdivision)) {
+                    current16thNote = 0;
+                }
+            }
+            
+            function scheduler() {
+                while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
+                    scheduleNote(current16thNote / subdivision, nextNoteTime);
+                    nextNote();
+                }
+                schedulerTimerID = window.setTimeout(scheduler, 25.0);
+            }
+
+            function startMetronome() {
+                initAudio();
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                current16thNote = 0;
+                nextNoteTime = audioContext.currentTime + 0.1;
+                scheduler();
+                togglePlayState(true);
+            }
+
+            function stopMetronome() {
+                window.clearTimeout(schedulerTimerID);
+                togglePlayState(false);
+            }
+
+            // --- EVENT LISTENERS ---
+            playPauseBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    stopMetronome();
+                } else {
+                    startMetronome();
+                }
+            });
+
+            bpmSlider.addEventListener('input', (e) => {
+                bpm = parseInt(e.target.value, 10);
+                updateBpmUI(bpm);
+            });
+
+            bpmInput.addEventListener('change', (e) => {
+                let val = parseInt(e.target.value, 10);
+                if (val < 40) val = 40;
+                if (val > 240) val = 240;
+                bpm = val;
+                updateBpmUI(bpm);
+            });
+            
+            volumeSlider.addEventListener('input', (e) => {
+                volume = parseFloat(e.target.value);
+                if (gainNode) {
+                    gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                }
+            });
+
+            timeSignatureGroup.addEventListener('click', (e) => {
+                if (e.target.matches('.control-btn')) {
+                    const value = e.target.dataset.value;
+                    beatsPerMeasure = parseInt(value.split('/')[0], 10);
+                    setActiveButton(timeSignatureGroup, value);
+                }
+            });
+            
+            subdivisionGroup.addEventListener('click', (e) => {
+                if (e.target.matches('.control-btn, .control-btn *')) {
+                    const btn = e.target.closest('.control-btn');
+                    const value = btn.dataset.value;
+                    subdivision = parseInt(value, 10);
+                    setActiveButton(subdivisionGroup, value);
+                }
+            });
+            
+            tapTempoBtn.addEventListener('click', () => {
+                initAudio();
+                const time = audioContext.currentTime;
+                
+                if (tapTimes.length > 0 && time - tapTimes[tapTimes.length - 1] > 2) {
+                    tapTimes = []; // Reset after 2 seconds
+                }
+                
+                tapTimes.push(time);
+                if (tapTimes.length > 5) {
+                    tapTimes.shift();
+                }
+                
+                if (tapTimes.length > 1) {
+                    const intervals = [];
+                    for (let i = 1; i < tapTimes.length; i++) {
+                        intervals.push(tapTimes[i] - tapTimes[i - 1]);
+                    }
+                    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                    const newBpm = Math.round(60 / avgInterval);
+                    if (newBpm >= 40 && newBpm <= 240) {
+                         bpm = newBpm;
+                         updateBpmUI(bpm);
+                    }
+                }
+                
+                // Visual feedback for tap
+                tapTempoBtn.classList.add('bg-white/30');
+                setTimeout(() => tapTempoBtn.classList.remove('bg-white/30'), 100);
+            });
+            
+            // Apply custom styles for control buttons, as Tailwind doesn't have a direct way to style by attribute
+            timeSignatureGroup.querySelectorAll('.control-btn').forEach(btn => btn.classList.add('py-2', 'rounded-md', 'bg-white/10', 'hover:bg-brand-secondary/50', 'transition-all', 'duration-200'));
+            subdivisionGroup.querySelectorAll('.control-btn').forEach(btn => btn.classList.add('py-2', 'rounded-md', 'bg-white/10', 'hover:bg-brand-tertiary/50', 'transition-all', 'duration-200'));
+
+            // Initial setup for active buttons
+            setActiveButton(timeSignatureGroup, "4/4");
+            setActiveButton(subdivisionGroup, "1");
+        });
+    </script>
+</body>
+</html>
