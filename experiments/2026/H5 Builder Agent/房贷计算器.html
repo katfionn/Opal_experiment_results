@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未来之家·房贷计算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1A1A2E 0%, #0F001F 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #E0E7FF;
+            overflow: hidden; /* Prevent scrollbar from background animation */
+        }
+        h1, .display-font {
+            font-family: 'Outfit', sans-serif;
+        }
+        .calculator-card {
+            background: rgba(255, 255, 255, 0.05); /* Lighter base for glassmorphism */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-out;
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #6C5CE7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.5);
+        }
+        .gradient-button {
+            background: linear-gradient(90deg, #6C5CE7 0%, #A29BFE 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+        .gradient-button:hover {
+            background: linear-gradient(90deg, #A29BFE 0%, #6C5CE7 100%);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.6);
+            transform: translateY(-2px);
+        }
+        .gradient-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(108, 92, 231, 0.3);
+        }
+        .result-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid #6C5CE7;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .bg-animated {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .bg-animated::before, .bg-animated::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.4;
+            filter: blur(80px);
+        }
+        .bg-animated::before {
+            width: 300px;
+            height: 300px;
+            background: #6C5CE7;
+            top: 10%;
+            left: 5%;
+            animation: moveShape1 15s infinite alternate ease-in-out;
+        }
+        .bg-animated::after {
+            width: 400px;
+            height: 400px;
+            background: #A29BFE;
+            bottom: 15%;
+            right: 10%;
+            animation: moveShape2 18s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes moveShape1 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, 80px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes moveShape2 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-70px, -40px) scale(1.2); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* Custom Tailwind Configuration */
+        .tailwind-config { display: none; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            DEFAULT: '#6C5CE7', // Purple
+                            light: '#A29BFE', // Lighter Purple
+                            dark: '#4B409E', // Darker Purple
+                        },
+                        accent: {
+                            DEFAULT: '#00F0FF', // Cyan
+                            dark: '#00B0FF',
+                        },
+                        darkblue: {
+                            DEFAULT: '#1A1A2E',
+                            darker: '#0F001F',
+                        },
+                        textlight: '#E0E7FF',
+                        textdark: '#A3ADC1',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="bg-animated"></div>
+
+    <div class="calculator-card p-6 md:p-10 lg:p-12 max-w-lg w-full rounded-3xl text-textlight shadow-xl relative z-10">
+        <h1 class="text-3xl md:text-4xl font-outfit font-bold text-center mb-8 text-primary-light">未来之家·房贷计算器</h1>
+
+        <div class="mb-5">
+            <label for="loanAmount" class="block text-textdark font-semibold mb-2">贷款总额 (RMB)</label>
+            <input type="number" id="loanAmount" class="input-field w-full p-3 rounded-xl text-lg placeholder-textdark/50" placeholder="例如: 1,000,000" value="1000000" min="0">
+        </div>
+
+        <div class="mb-5">
+            <label for="interestRate" class="block text-textdark font-semibold mb-2">年利率 (%)</label>
+            <input type="number" id="interestRate" class="input-field w-full p-3 rounded-xl text-lg placeholder-textdark/50" placeholder="例如: 3.8" value="3.8" step="0.01" min="0">
+        </div>
+
+        <div class="mb-8">
+            <label for="loanTerm" class="block text-textdark font-semibold mb-2">贷款期限 (年)</label>
+            <input type="number" id="loanTerm" class="input-field w-full p-3 rounded-xl text-lg placeholder-textdark/50" placeholder="例如: 30" value="30" min="1">
+        </div>
+
+        <button id="calculateBtn" class="gradient-button w-full py-4 rounded-xl text-xl font-outfit font-bold uppercase tracking-wide">
+            计算每月还款
+        </button>
+
+        <div id="results" class="mt-8 pt-6 border-t border-white/10 hidden">
+            <div class="result-item flex justify-between items-center">
+                <span class="text-textdark text-md md:text-lg">每月还款:</span>
+                <span id="monthlyPayment" class="display-font text-2xl md:text-3xl font-bold text-primary-light">--</span>
+            </div>
+            <div class="result-item flex justify-between items-center">
+                <span class="text-textdark text-md md:text-lg">总支付利息:</span>
+                <span id="totalInterest" class="display-font text-xl md:text-2xl font-bold text-accent">--</span>
+            </div>
+            <div class="result-item flex justify-between items-center">
+                <span class="text-textdark text-md md:text-lg">总还款额:</span>
+                <span id="totalPayment" class="display-font text-xl md:text-2xl font-bold text-primary-light">--</span>
+            </div>
+        </div>
+
+        <p id="errorMessage" class="text-red-400 text-center mt-6 hidden">
+            请确保所有输入项均为有效正数。
+        </p>
+    </div>
+
+    <script>
+        const loanAmountInput = document.getElementById('loanAmount');
+        const interestRateInput = document.getElementById('interestRate');
+        const loanTermInput = document.getElementById('loanTerm');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultsDiv = document.getElementById('results');
+        const monthlyPaymentSpan = document.getElementById('monthlyPayment');
+        const totalInterestSpan = document.getElementById('totalInterest');
+        const totalPaymentSpan = document.getElementById('totalPayment');
+        const errorMessage = document.getElementById('errorMessage');
+
+        calculateBtn.addEventListener('click', calculateMortgage);
+
+        function calculateMortgage() {
+            const P = parseFloat(loanAmountInput.value);
+            const annualRate = parseFloat(interestRateInput.value);
+            const N = parseFloat(loanTermInput.value); // years
+
+            if (isNaN(P) || isNaN(annualRate) || isNaN(N) || P <= 0 || annualRate < 0 || N <= 0) {
+                errorMessage.classList.remove('hidden');
+                resultsDiv.classList.add('hidden');
+                return;
+            }
+
+            errorMessage.classList.add('hidden');
+
+            const monthlyRate = (annualRate / 100) / 12; // monthly interest rate
+            const numberOfPayments = N * 12; // total number of payments
+
+            let M; // monthly payment
+
+            if (monthlyRate === 0) {
+                M = P / numberOfPayments;
+            } else {
+                M = P * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+            }
+
+            const totalPayment = M * numberOfPayments;
+            const totalInterest = totalPayment - P;
+
+            monthlyPaymentSpan.textContent = `¥${M.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            totalInterestSpan.textContent = `¥${totalInterest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            totalPaymentSpan.textContent = `¥${totalPayment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            resultsDiv.classList.remove('hidden');
+        }
+
+        // Initial calculation on load for default values
+        document.addEventListener('DOMContentLoaded', calculateMortgage);
+    </script>
+</body>
+</html>
