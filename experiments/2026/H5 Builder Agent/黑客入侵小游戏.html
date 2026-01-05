@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Defense Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        @layer utilities {
+            .text-glow {
+                text-shadow: 0 0 5px theme('colors.neon-green'), 0 0 10px theme('colors.neon-green'), 0 0 20px theme('colors.neon-green-dark');
+            }
+            .text-glow-red {
+                text-shadow: 0 0 8px theme('colors.red.500'), 0 0 12px theme('colors.red.500'), 0 0 20px theme('colors.red.600');
+            }
+        }
+        
+        body {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%2300ff87" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/></svg>') 12 12, auto;
+        }
+        
+        .glass-panel {
+            background: rgba(16, 22, 39, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 255, 135, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-primary {
+            background-color: rgba(0, 255, 135, 0.1);
+            color: #00ff87;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 2px solid #00ff87;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            background-color: #00ff87;
+            color: #0a0f19;
+            box-shadow: 0 0 20px #00ff87;
+        }
+
+        .glow-anim {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 5px theme('colors.neon-green'), 0 0 10px theme('colors.neon-green');
+            }
+            50% {
+                box-shadow: 0 0 15px theme('colors.neon-green'), 0 0 25px theme('colors.neon-green');
+            }
+        }
+
+        #log-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        #log-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #log-content::-webkit-scrollbar-thumb {
+            background-color: theme('colors.neon-green');
+            border-radius: 20px;
+        }
+
+        .key-press-flash {
+            animation: border-flash 0.3s ease-out;
+        }
+
+        @keyframes border-flash {
+            0%, 100% {
+                border-color: rgba(0, 255, 135, 0.2);
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            }
+            50% {
+                border-color: rgba(0, 255, 135, 1);
+                box-shadow: 0 0 25px rgba(0, 255, 135, 0.5);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.5s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+
+    </style>
+</head>
+<body class="bg-dark-bg text-gray-100 font-sans antialiased overflow-hidden">
+    <canvas id="matrix-canvas" class="absolute top-0 left-0 w-full h-full z-0"></canvas>
+    <div id="vignette" class="absolute top-0 left-0 w-full h-full z-10 pointer-events-none" style="background: radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(10, 15, 25, 0.95) 100%);"></div>
+
+    <main class="relative z-20 flex items-center justify-center min-h-screen p-4">
+        <div id="game-container" class="w-full max-w-2xl">
+
+            <div id="start-screen" class="glass-panel text-center p-8 fade-in">
+                <h1 class="font-display text-4xl md:text-5xl font-bold text-neon-green uppercase tracking-widest text-glow">System Security</h1>
+                <p class="mt-4 text-lg text-gray-300">Maintain the connection by typing. If the security shield depletes, the system will be breached. Don't let them in.</p>
+                <button id="start-btn" class="mt-8 btn-primary focus:outline-none focus:ring-4 focus:ring-neon-green/50">Initialize Defense Protocol</button>
+            </div>
+
+            <div id="game-screen" class="hidden glass-panel p-6 md:p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-display text-2xl text-neon-green uppercase tracking-wider text-glow">Firewall Active</h2>
+                    <div id="status-light" class="w-4 h-4 rounded-full bg-neon-green glow-anim"></div>
+                </div>
+                <div class="w-full bg-gray-700/50 rounded-full h-4 border border-neon-green/30 overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-neon-green-dark to-neon-green h-full rounded-full transition-all duration-100 ease-linear"></div>
+                </div>
+                <div class="mt-6 h-64 bg-black/50 rounded-lg p-4 overflow-y-auto font-mono text-sm text-neon-green border border-neon-green/20" id="log-container">
+                    <div id="log-content"></div>
+                </div>
+            </div>
+
+            <div id="game-over-screen" class="hidden glass-panel text-center p-8">
+                <h1 class="font-display text-4xl md:text-6xl font-bold text-red-500 uppercase tracking-widest text-glow-red animate-pulse">SYSTEM BREACHED</h1>
+                <p class="mt-4 text-lg text-gray-300">External connection detected. Firewall compromised. All data is at risk.</p>
+                <button id="restart-btn" class="mt-8 btn-primary focus:outline-none focus:ring-4 focus:ring-neon-green/50">Re-secure System</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Outfit', 'sans-serif'],
+                        'mono': ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        'neon-green': '#00ff87',
+                        'neon-green-dark': '#00a758',
+                        'dark-bg': '#0a0f19',
+                    }
+                }
+            }
+        }
+
+        // --- Matrix Rain Effect ---
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const characters = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = new Array(columns).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(10, 15, 25, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff87';
+            ctx.font = `${fontSize}px Share Tech Mono`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 33);
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // --- Game Logic ---
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        const progressBar = document.getElementById('progress-bar');
+        const logContent = document.getElementById('log-content');
+        const logContainer = document.getElementById('log-container');
+
+        let gameRunning = false;
+        let roundTimeoutId;
+        let progressIntervalId;
+
+        const LOG_MESSAGES = [
+            'Encrypting data packets...',
+            'Routing through proxy server...',
+            'Scanning for vulnerabilities...',
+            'Kernel integrity check passed.',
+            'Firewall rule #404 updated.',
+            'Incoming connection from 127.0.0.1 blocked.',
+            'Compiling defense subroutines...',
+            'System load at 78%.',
+            'Quantum-tunneling connection stabilized.',
+            'Purging temp files...',
+            'Backdoor access denied.',
+            'User authentication successful.',
+            'System clock synchronized with atomic server.',
+        ];
+
+        function switchScreen(hide, show) {
+            hide.classList.add('fade-out');
+            setTimeout(() => {
+                hide.classList.add('hidden');
+                hide.classList.remove('fade-out');
+                show.classList.remove('hidden');
+                show.classList.add('fade-in');
+            }, 300);
+        }
+
+        function addLogMessage(message) {
+            const p = document.createElement('p');
+            p.innerHTML = `&gt; ${message}`;
+            logContent.appendChild(p);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function startNewRound() {
+            clearTimeout(roundTimeoutId);
+            clearInterval(progressIntervalId);
+
+            const roundTime = Math.random() * 3000 + 3000; // 3 to 6 seconds
+            const startTime = Date.now();
+            
+            roundTimeoutId = setTimeout(gameOver, roundTime);
+
+            progressIntervalId = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const percentage = 100 - (elapsed / roundTime * 100);
+                progressBar.style.width = `${Math.max(0, percentage)}%`;
+            }, 50);
+        }
+
+        const handleKeyPress = (e) => {
+            if (!gameRunning) return;
+            
+            gameScreen.classList.add('key-press-flash');
+            setTimeout(() => gameScreen.classList.remove('key-press-flash'), 300);
+            
+            addLogMessage(LOG_MESSAGES[Math.floor(Math.random() * LOG_MESSAGES.length)]);
+            startNewRound();
+        };
+
+        function startGame() {
+            gameRunning = true;
+            logContent.innerHTML = '';
+            addLogMessage('Connection established with main server...');
+            addLogMessage('Security protocols initiated...');
+            
+            switchScreen(startScreen.classList.contains('hidden') ? gameOverScreen : startScreen, gameScreen);
+            
+            document.addEventListener('keydown', handleKeyPress);
+            startNewRound();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            clearTimeout(roundTimeoutId);
+            clearInterval(progressIntervalId);
+            document.removeEventListener('keydown', handleKeyPress);
+            
+            switchScreen(gameScreen, gameOverScreen);
+        }
+
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', startGame);
+
+    </script>
+</body>
+</html>
