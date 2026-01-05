@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未来科技感房贷计算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body {
+            background: linear-gradient(-45deg, #0a0e23, #0b112b, #1a2349, #3d3b8e);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .tab-active {
+            background: rgba(88, 80, 236, 0.6);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .repayment-method-active {
+            background-color: #5850ec;
+            border-color: #5850ec;
+            color: white;
+        }
+        .input-field {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            background: rgba(0,0,0,0.3);
+            border-color: #5850ec;
+            box-shadow: 0 0 0 2px rgba(88, 80, 236, 0.5);
+        }
+        .calculate-btn {
+            background: linear-gradient(90deg, #5850ec, #8a55ea);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(88, 80, 236, 0.4);
+        }
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(88, 80, 236, 0.6);
+        }
+        .result-value {
+            color: #82e9de;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5850ec;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8a55ea;
+        }
+    </style>
+</head>
+<body class="text-gray-200 font-[Outfit,sans-serif] min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+
+    <main class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
+        
+        <!-- Calculator Panel -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6 sm:p-8 space-y-8">
+            <header>
+                <h1 class="text-3xl font-bold text-white tracking-wider">智能房贷计算器</h1>
+                <p class="text-gray-400 mt-2">精准计算，洞见未来财务</p>
+            </header>
+
+            <!-- Loan Type Tabs -->
+            <div class="grid grid-cols-3 gap-2 bg-black/20 rounded-lg p-1">
+                <button id="tab-commercial" class="tab-btn tab-active py-2 px-4 rounded-md text-sm transition-all duration-300">商业贷款</button>
+                <button id="tab-provident" class="tab-btn py-2 px-4 rounded-md text-sm transition-all duration-300">公积金</button>
+                <button id="tab-combo" class="tab-btn py-2 px-4 rounded-md text-sm transition-all duration-300">组合贷款</button>
+            </div>
+
+            <!-- Input Fields -->
+            <div class="space-y-6">
+                <div id="commercial-loan-amount-group">
+                    <label for="commercial-loan-amount" class="text-sm font-medium text-gray-300">商业贷款总额 (万元)</label>
+                    <input type="number" id="commercial-loan-amount" class="input-field w-full mt-2 p-3 rounded-lg text-white outline-none" value="100">
+                </div>
+                <div id="provident-loan-amount-group" class="hidden">
+                    <label for="provident-loan-amount" class="text-sm font-medium text-gray-300">公积金贷款总额 (万元)</label>
+                    <input type="number" id="provident-loan-amount" class="input-field w-full mt-2 p-3 rounded-lg text-white outline-none" value="50">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="loan-term" class="text-sm font-medium text-gray-300">贷款年限 (年)</label>
+                        <input type="number" id="loan-term" class="input-field w-full mt-2 p-3 rounded-lg text-white outline-none" value="30">
+                    </div>
+                    <div>
+                        <label for="interest-rate" class="text-sm font-medium text-gray-300">商贷利率 (%)</label>
+                        <input type="number" step="0.01" id="interest-rate" class="input-field w-full mt-2 p-3 rounded-lg text-white outline-none" value="4.1">
+                    </div>
+                </div>
+                <div id="provident-rate-group" class="hidden">
+                    <label for="provident-interest-rate" class="text-sm font-medium text-gray-300">公积金利率 (%)</label>
+                    <input type="number" step="0.01" id="provident-interest-rate" class="input-field w-full mt-2 p-3 rounded-lg text-white outline-none" value="3.1">
+                </div>
+            </div>
+
+            <!-- Repayment Method -->
+            <div>
+                <label class="text-sm font-medium text-gray-300 mb-2 block">还款方式</label>
+                <div class="flex border border-gray-600 rounded-lg">
+                    <button id="repayment-equal-installment" class="repayment-method-btn repayment-method-active flex-1 py-3 text-sm transition-all duration-300 rounded-l-md">等额本息</button>
+                    <button id="repayment-equal-principal" class="repayment-method-btn flex-1 py-3 text-sm transition-all duration-300 rounded-r-md">等额本金</button>
+                </div>
+            </div>
+
+            <button id="calculate-btn" class="calculate-btn w-full py-4 text-white font-bold rounded-lg text-lg">
+                开始计算
+            </button>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="lg:col-span-3 glass-card rounded-2xl p-6 sm:p-8 flex flex-col min-h-[500px]">
+            <div id="results-placeholder" class="flex flex-col items-center justify-center h-full text-center text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <h3 class="text-xl font-semibold text-white">等待计算结果</h3>
+                <p class="mt-2 max-w-xs">请在左侧输入您的贷款信息，我们将为您生成详细的还款计划和可视化分析。</p>
+            </div>
+
+            <div id="results-content" class="hidden flex-1 flex-col space-y-6">
+                <!-- Summary & Chart -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h2 class="text-xl font-bold text-white">计算结果</h2>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">首月月供</span>
+                                <span id="monthly-payment" class="text-2xl font-bold result-value"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">贷款总额</span>
+                                <span id="total-loan" class="text-lg font-medium text-white"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">支付利息</span>
+                                <span id="total-interest" class="text-lg font-medium text-white"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">还款总额</span>
+                                <span id="total-payment" class="text-lg font-medium text-white"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">还款月数</span>
+                                <span id="total-months" class="text-lg font-medium text-white"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative h-48 md:h-full flex items-center justify-center">
+                        <canvas id="loan-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Amortization Table -->
+                <div class="flex-1 flex flex-col min-h-0">
+                    <h2 class="text-xl font-bold text-white mb-4">还款明细</h2>
+                    <div class="flex-1 overflow-y-auto pr-2">
+                        <table class="w-full text-sm text-left">
+                            <thead class="sticky top-0 bg-black/30">
+                                <tr>
+                                    <th class="p-3">期数</th>
+                                    <th class="p-3">月供</th>
+                                    <th class="p-3">月供本金</th>
+                                    <th class="p-3">月供利息</th>
+                                    <th class="p-3">剩余本金</th>
+                                </tr>
+                            </thead>
+                            <tbody id="amortization-table-body">
+                                <!-- Rows will be injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // State
+            let activeLoanType = 'commercial';
+            let activeRepaymentMethod = 'equal-installment';
+            let myChart = null;
+
+            // DOM Elements
+            const tabs = {
+                commercial: document.getElementById('tab-commercial'),
+                provident: document.getElementById('tab-provident'),
+                combo: document.getElementById('tab-combo'),
+            };
+            const loanAmountGroups = {
+                commercial: document.getElementById('commercial-loan-amount-group'),
+                provident: document.getElementById('provident-loan-amount-group'),
+            };
+            const rateGroups = {
+                provident: document.getElementById('provident-rate-group'),
+                commercial: document.getElementById('interest-rate').parentElement.parentElement,
+            };
+            const repaymentMethodBtns = {
+                'equal-installment': document.getElementById('repayment-equal-installment'),
+                'equal-principal': document.getElementById('repayment-equal-principal'),
+            };
+
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resultsPlaceholder = document.getElementById('results-placeholder');
+            const resultsContent = document.getElementById('results-content');
+            
+            // Format numbers
+            const formatCurrency = (num) => num.toLocaleString('zh-CN', { style: 'currency', currency: 'CNY' });
+            
+            // Event Listeners
+            Object.keys(tabs).forEach(key => {
+                tabs[key].addEventListener('click', () => setActiveLoanType(key));
+            });
+
+            Object.keys(repaymentMethodBtns).forEach(key => {
+                repaymentMethodBtns[key].addEventListener('click', () => setActiveRepaymentMethod(key));
+            });
+
+            calculateBtn.addEventListener('click', performCalculation);
+
+            // UI update functions
+            function setActiveLoanType(type) {
+                if (activeLoanType === type) return;
+                
+                tabs[activeLoanType].classList.remove('tab-active');
+                tabs[type].classList.add('tab-active');
+                activeLoanType = type;
+
+                // Toggle visibility of input groups
+                loanAmountGroups.commercial.style.display = (type === 'commercial' || type === 'combo') ? 'block' : 'none';
+                loanAmountGroups.provident.style.display = (type === 'provident' || type === 'combo') ? 'block' : 'none';
+                rateGroups.commercial.style.display = (type === 'commercial' || type === 'combo') ? 'grid' : 'none';
+                rateGroups.provident.style.display = (type === 'provident' || type === 'combo') ? 'block' : 'none';
+            }
+
+            function setActiveRepaymentMethod(method) {
+                if (activeRepaymentMethod === method) return;
+
+                repaymentMethodBtns[activeRepaymentMethod].classList.remove('repayment-method-active');
+                repaymentMethodBtns[method].classList.add('repayment-method-active');
+                activeRepaymentMethod = method;
+            }
+            
+            // Calculation logic
+            function performCalculation() {
+                // Get inputs
+                const commercialLoanAmount = parseFloat(document.getElementById('commercial-loan-amount').value) * 10000 || 0;
+                const providentLoanAmount = parseFloat(document.getElementById('provident-loan-amount').value) * 10000 || 0;
+                const loanTermYears = parseInt(document.getElementById('loan-term').value) || 0;
+                const commercialRate = parseFloat(document.getElementById('interest-rate').value) / 100 || 0;
+                const providentRate = parseFloat(document.getElementById('provident-interest-rate').value) / 100 || 0;
+
+                if (loanTermYears <= 0) {
+                    alert('请输入有效的贷款年限！');
+                    return;
+                }
+
+                let totalLoan = 0;
+                let results = {};
+
+                if (activeLoanType === 'commercial') {
+                    totalLoan = commercialLoanAmount;
+                    if (totalLoan <= 0 || commercialRate <= 0) {
+                        alert('请输入有效的商业贷款金额和利率！');
+                        return;
+                    }
+                    results = calculate(totalLoan, loanTermYears, commercialRate, activeRepaymentMethod);
+                } else if (activeLoanType === 'provident') {
+                    totalLoan = providentLoanAmount;
+                    if (totalLoan <= 0 || providentRate <= 0) {
+                        alert('请输入有效的公积金贷款金额和利率！');
+                        return;
+                    }
+                    results = calculate(totalLoan, loanTermYears, providentRate, activeRepaymentMethod);
+                } else { // combo
+                    if (commercialLoanAmount <= 0 || providentLoanAmount <= 0 || commercialRate <= 0 || providentRate <= 0) {
+                        alert('请输入有效的组合贷款金额和利率！');
+                        return;
+                    }
+                    const commercialResults = calculate(commercialLoanAmount, loanTermYears, commercialRate, activeRepaymentMethod);
+                    const providentResults = calculate(providentLoanAmount, loanTermYears, providentRate, activeRepaymentMethod);
+
+                    totalLoan = commercialLoanAmount + providentLoanAmount;
+                    results.totalInterest = commercialResults.totalInterest + providentResults.totalInterest;
+                    results.totalPayment = commercialResults.totalPayment + providentResults.totalPayment;
+                    results.monthlyPayment = commercialResults.monthlyPayment + providentResults.monthlyPayment; // For equal installment
+                    results.firstMonthPayment = commercialResults.firstMonthPayment + providentResults.firstMonthPayment; // For equal principal
+
+                    results.schedule = [];
+                    for(let i=0; i < loanTermYears * 12; i++) {
+                        const commercialMonth = commercialResults.schedule[i];
+                        const providentMonth = providentResults.schedule[i];
+                        results.schedule.push({
+                            month: i + 1,
+                            monthlyPayment: commercialMonth.monthlyPayment + providentMonth.monthlyPayment,
+                            principal: commercialMonth.principal + providentMonth.principal,
+                            interest: commercialMonth.interest + providentMonth.interest,
+                            remainingPrincipal: commercialMonth.remainingPrincipal + providentMonth.remainingPrincipal
+                        });
+                    }
+                }
+
+                updateUI(results, totalLoan, loanTermYears);
+            }
+
+            function calculate(principal, years, annualRate, method) {
+                const months = years * 12;
+                const monthlyRate = annualRate / 12;
+                const schedule = [];
+                let totalInterest = 0;
+                let remainingPrincipal = principal;
+                let firstMonthPayment = 0;
+
+                if (method === 'equal-installment') { // 等额本息
+                    const monthlyPayment = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+                    firstMonthPayment = monthlyPayment;
+
+                    for (let i = 1; i <= months; i++) {
+                        const interestForMonth = remainingPrincipal * monthlyRate;
+                        const principalForMonth = monthlyPayment - interestForMonth;
+                        remainingPrincipal -= principalForMonth;
+                        totalInterest += interestForMonth;
+
+                        schedule.push({
+                            month: i,
+                            monthlyPayment: monthlyPayment,
+                            principal: principalForMonth,
+                            interest: interestForMonth,
+                            remainingPrincipal: remainingPrincipal < 0 ? 0 : remainingPrincipal
+                        });
+                    }
+                    return { monthlyPayment, totalInterest, totalPayment: principal + totalInterest, schedule };
+                } else { // 等额本金
+                    const monthlyPrincipal = principal / months;
+                    for (let i = 1; i <= months; i++) {
+                        const interestForMonth = remainingPrincipal * monthlyRate;
+                        const monthlyPayment = monthlyPrincipal + interestForMonth;
+                        if (i === 1) firstMonthPayment = monthlyPayment;
+                        remainingPrincipal -= monthlyPrincipal;
+                        totalInterest += interestForMonth;
+
+                        schedule.push({
+                            month: i,
+                            monthlyPayment: monthlyPayment,
+                            principal: monthlyPrincipal,
+                            interest: interestForMonth,
+                            remainingPrincipal: remainingPrincipal < 0 ? 0 : remainingPrincipal
+                        });
+                    }
+                    return { firstMonthPayment, totalInterest, totalPayment: principal + totalInterest, schedule };
+                }
+            }
+
+            function updateUI(results, totalLoan, years) {
+                resultsPlaceholder.classList.add('hidden');
+                resultsContent.classList.remove('hidden');
+                resultsContent.classList.add('flex');
+
+                const firstPayment = activeRepaymentMethod === 'equal-installment' ? results.monthlyPayment : results.schedule[0].monthlyPayment;
+
+                document.getElementById('monthly-payment').textContent = formatCurrency(firstPayment);
+                document.getElementById('total-loan').textContent = formatCurrency(totalLoan);
+                document.getElementById('total-interest').textContent = formatCurrency(results.totalInterest);
+                document.getElementById('total-payment').textContent = formatCurrency(results.totalPayment);
+                document.getElementById('total-months').textContent = `${years * 12} 月`;
+
+                // Update table
+                const tableBody = document.getElementById('amortization-table-body');
+                tableBody.innerHTML = '';
+                results.schedule.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-white/10 hover:bg-white/10 transition-colors duration-200';
+                    tr.innerHTML = `
+                        <td class="p-3">${row.month}</td>
+                        <td class="p-3">${row.monthlyPayment.toFixed(2)}</td>
+                        <td class="p-3">${row.principal.toFixed(2)}</td>
+                        <td class="p-3 text-red-400">${row.interest.toFixed(2)}</td>
+                        <td class="p-3">${row.remainingPrincipal.toFixed(2)}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                // Update chart
+                const ctx = document.getElementById('loan-chart').getContext('2d');
+                if (myChart) {
+                    myChart.destroy();
+                }
+                myChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['总本金', '总利息'],
+                        datasets: [{
+                            data: [totalLoan, results.totalInterest],
+                            backgroundColor: ['#5850ec', '#8a55ea'],
+                            borderColor: ['rgba(255, 255, 255, 0.1)'],
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#9ca3af',
+                                    font: {
+                                        size: 12,
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += formatCurrency(context.parsed);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
