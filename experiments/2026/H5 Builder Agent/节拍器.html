@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic Aurora Metronome - 音乐人作曲伴侣</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200..900&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for a sleek look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: hsl(240, 15%, 12%);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: hsl(260, 60%, 40%);
+            border-radius: 10px;
+            border: 2px solid hsl(240, 15%, 12%);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: hsl(260, 70%, 50%);
+        }
+
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Glassmorphism effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Custom range slider thumb and track */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--tw-gradient-from); /* Use accent color */
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 0 0 4px rgba(var(--tw-accent-purple-rgb), 0.3);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--tw-gradient-to);
+            box-shadow: 0 0 0 6px rgba(var(--tw-accent-cyan-rgb), 0.4);
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(to right, var(--tw-accent-purple), var(--tw-accent-cyan));
+            border-radius: 5px;
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Pulse animation for active beat indicators */
+        @keyframes beat-pulse {
+            0% { transform: scale(0.8); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+        .beat-indicator.active {
+            animation: beat-pulse 0.1s ease-out forwards;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .beat-indicator.active.accent {
+            background-color: hsl(260, 90%, 75%) !important; /* Brighter accent for first beat */
+            box-shadow: 0 0 15px hsl(260, 90%, 75%);
+        }
+
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bg-primary': 'hsl(240, 15%, 10%)',
+                        'accent-purple': 'hsl(260, 80%, 65%)',
+                        'accent-cyan': 'hsl(180, 70%, 55%)',
+                        'text-light': 'hsl(220, 30%, 90%)',
+                        'detail-dark': 'hsl(240, 10%, 25%)',
+                        'card-bg': 'rgba(255, 255, 255, 0.05)',
+                        'card-border': 'rgba(255, 255, 255, 0.1)',
+                    },
+                    fontFamily: {
+                        outfit: ['Outfit', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'glow-pulse': 'glow-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'beat-flash': 'beat-flash 0.1s ease-out forwards',
+                    },
+                    keyframes: {
+                        'glow-pulse': {
+                            '0%, 100%': { transform: 'scale(1)', opacity: '0.7' },
+                            '50%': { transform: 'scale(1.05)', opacity: '1' },
+                        },
+                        'beat-flash': {
+                            '0%': { opacity: '0.2', transform: 'scale(0.8)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        }
+                    }
+                }
+            },
+            plugins: [],
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-bg-primary to-detail-dark text-text-light min-h-screen flex items-center justify-center p-4 selection:bg-accent-purple selection:text-white overflow-y-auto">
+
+    <div class="relative w-full max-w-4xl mx-auto p-6 md:p-10 rounded-3xl glass-card border-none flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
+        <!-- Background decorative elements -->
+        <div class="absolute top-1/4 left-0 w-48 h-48 bg-accent-purple rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-glow-pulse"></div>
+        <div class="absolute bottom-1/4 right-0 w-64 h-64 bg-accent-cyan rounded-full mix-blend-screen filter blur-3xl opacity-15 animate-glow-pulse animation-delay-2000"></div>
+
+        <!-- Metronome Core Controls -->
+        <div class="flex-1 min-w-0 z-10 space-y-8 p-4 md:p-6 bg-card-bg rounded-2xl border border-card-border shadow-xl">
+            <h1 class="text-4xl md:text-5xl font-outfit font-bold text-center text-gradient-to-r from-accent-purple to-accent-cyan leading-tight mb-4">
+                Sonic Aurora Metronome
+                <span class="block text-xl md:text-2xl font-inter font-light opacity-80 mt-2">音乐人作曲伴侣</span>
+            </h1>
+
+            <!-- BPM Display and Controls -->
+            <div class="text-center bg-detail-dark p-6 rounded-xl relative overflow-hidden shadow-inner border border-card-border">
+                <span class="absolute inset-0 bg-gradient-to-br from-accent-purple/10 to-accent-cyan/10 opacity-30"></span>
+                <p class="font-inter text-lg opacity-70 mb-2 z-10 relative">节拍速度 (BPM)</p>
+                <div class="flex items-center justify-center gap-4 mb-4 z-10 relative">
+                    <button id="bpm-decrement" class="bg-card-bg text-text-light w-12 h-12 rounded-full flex items-center justify-center text-3xl font-light hover:bg-accent-purple/30 transition duration-300 transform hover:scale-105 border border-card-border">-</button>
+                    <span id="bpm-display" class="font-outfit text-7xl md:text-8xl font-extrabold text-white tracking-tight drop-shadow-lg transition-all duration-100 ease-out">120</span>
+                    <button id="bpm-increment" class="bg-card-bg text-text-light w-12 h-12 rounded-full flex items-center justify-center text-3xl font-light hover:bg-accent-cyan/30 transition duration-300 transform hover:scale-105 border border-card-border">+</button>
+                </div>
+                <input type="range" id="bpm-slider" min="40" max="240" value="120" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-transparent z-10 relative">
+                <button id="tap-tempo-btn" class="mt-4 px-6 py-3 bg-accent-purple/20 text-accent-purple rounded-full text-lg font-inter font-medium hover:bg-accent-purple/40 transition duration-300 border border-accent-purple/50 z-10 relative">
+                    Tap Tempo
+                </button>
+            </div>
+
+            <!-- Play/Stop Button -->
+            <div class="text-center z-10 relative">
+                <button id="play-pause-btn" class="w-40 h-40 md:w-48 md:h-48 rounded-full shadow-2xl flex items-center justify-center mx-auto
+                                                    bg-gradient-to-br from-accent-purple to-accent-cyan
+                                                    text-white text-5xl md:text-6xl
+                                                    transform transition-all duration-300
+                                                    hover:scale-105 hover:shadow-accent-purple/50
+                                                    active:scale-95 active:shadow-accent-cyan/50
+                                                    border-4 border-white/20">
+                    <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-20 h-20">
+                        <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 20.99A3.375 3.375 0 0 1 4.5 19.346V5.653Z" clip-rule="evenodd" />
+                    </svg>
+                    <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-20 h-20 hidden">
+                        <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metronome Settings Panel -->
+        <div class="flex-1 w-full lg:min-w-[300px] z-10 space-y-6 p-4 md:p-6 bg-card-bg rounded-2xl border border-card-border shadow-xl">
+            <h2 class="text-3xl font-outfit font-bold text-center text-text-light mb-6 opacity-90">高级设置</h2>
+
+            <!-- Beat Indicators -->
+            <div class="bg-detail-dark p-5 rounded-xl border border-card-border shadow-inner">
+                <p class="font-inter text-lg opacity-70 mb-3 text-center">节拍可视化</p>
+                <div id="beat-indicators" class="flex justify-center gap-3 md:gap-4 items-center h-10">
+                    <!-- Dynamic beat indicator dots will be inserted here by JS -->
+                </div>
+            </div>
+
+            <!-- Time Signature Controls -->
+            <div class="bg-detail-dark p-5 rounded-xl border border-card-border shadow-inner">
+                <p class="font-inter text-lg opacity-70 mb-3 text-center">拍号</p>
+                <div class="flex items-center justify-center gap-4">
+                    <select id="time-signature-numerator" class="bg-card-bg text-text-light p-3 rounded-lg text-lg border border-card-border focus:ring-2 focus:ring-accent-purple/50 focus:border-transparent transition duration-300 cursor-pointer">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                    <span class="text-3xl font-outfit text-accent-cyan">/</span>
+                    <select id="time-signature-denominator" class="bg-card-bg text-text-light p-3 rounded-lg text-lg border border-card-border focus:ring-2 focus:ring-accent-purple/50 focus:border-transparent transition duration-300 cursor-pointer">
+                        <option value="1">整音符</option>
+                        <option value="2">二分音符</option>
+                        <option value="4" selected>四分音符</option>
+                        <option value="8">八分音符</option>
+                        <option value="16">十六分音符</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Subdivision Controls -->
+            <div class="bg-detail-dark p-5 rounded-xl border border-card-border shadow-inner">
+                <p class="font-inter text-lg opacity-70 mb-3 text-center">节拍细分</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button data-subdivision="1" class="subdivision-btn bg-card-bg text-text-light p-3 rounded-lg border border-card-border hover:bg-accent-purple/30 transition duration-300 focus:ring-2 focus:ring-accent-purple/50 active:scale-98 font-inter">无细分 (x1)</button>
+                    <button data-subdivision="2" class="subdivision-btn bg-card-bg text-text-light p-3 rounded-lg border border-card-border hover:bg-accent-purple/30 transition duration-300 focus:ring-2 focus:ring-accent-purple/50 active:scale-98 font-inter">八分音符 (x2)</button>
+                    <button data-subdivision="3" class="subdivision-btn bg-card-bg text-text-light p-3 rounded-lg border border-card-border hover:bg-accent-purple/30 transition duration-300 focus:ring-2 focus:ring-accent-purple/50 active:scale-98 font-inter">三连音 (x3)</button>
+                    <button data-subdivision="4" class="subdivision-btn bg-card-bg text-text-light p-3 rounded-lg border border-card-border hover:bg-accent-purple/30 transition duration-300 focus:ring-2 focus:ring-accent-purple/50 active:scale-98 font-inter">十六分音符 (x4)</button>
+                </div>
+            </div>
+
+            <!-- Volume Control -->
+            <div class="bg-detail-dark p-5 rounded-xl border border-card-border shadow-inner">
+                <p class="font-inter text-lg opacity-70 mb-3 text-center">音量</p>
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-accent-cyan">
+                        <path d="M13.5 4.06c0-1.336-1.661-2.042-2.653-1.194L8.223 4.38a3.375 3.375 0 0 1-2.15 1.028H3.375c-1.036 0-1.875.84-1.875 1.875v8.25c0 1.035.84 1.875 1.875 1.875h2.698c1.029 0 1.946.594 2.15 1.577l2.624 2.438c.992.918 2.653.212 2.653-1.194V4.06ZM18.04 18.04a5.25 5.25 0 0 0 7.424-7.424l-.707-.707a4.25 4.25 0 0 1-5.94 5.94l.707.707ZM18.04 6.707a5.25 5.25 0 0 0-7.424 7.424l.707.707a4.25 4.25 0 0 1 5.94-5.94l-.707-.707Z" />
+                    </svg>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.75" class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-transparent">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-accent-cyan">
+                        <path fill-rule="evenodd" d="M17.25 9.75a.75.75 0 0 1 .75.75V14.5a.75.75 0 0 1-1.5 0V10.5a.75.75 0 0 1 .75-.75Zm-.75 2.25H16a.75.75 0 0 0-.75.75v3a.75.75 0 0 0 .75.75h.5a.75.75 0 0 0 .75-.75v-3a.75.75 0 0 0-.75-.75Zm2.25-.75a.75.75 0 0 0-.75.75V15a.75.75 0 0 0 1.5 0v-2.25a.75.75 0 0 0-.75-.75Zm-.75 2.25h-.5a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75Zm-.75 3.75a.75.75 0 0 0-.75.75v.75a.75.75 0 0 0 1.5 0v-.75a.75.75 0 0 0-.75-.75ZM3.375 5.25c-.802 0-1.503.582-1.653 1.355L1.155 8.27A3.375 3.375 0 0 0 1.5 10.058v4.034c0 .878.39 1.624.992 2.15l.566.496c.15.773.851 1.355 1.653 1.355h.375c.802 0 1.503-.582 1.653-1.355l.566-.496a3.375 3.375 0 0 0 .992-2.15V10.058c0-.878-.39-1.624-.992-2.15L5.428 7.005a1.875 1.875 0 0 1-1.653-1.355h-.375ZM13 10.5c0-.878-.39-1.624-.992-2.15L11.44 7.005a1.875 1.875 0 0 1-1.653-1.355h-.375c-.802 0-1.503.582-1.653 1.355L6.89 8.27A3.375 3.375 0 0 0 7.23 10.058v4.034c0 .878.39 1.624.992 2.15l.566.496c.15.773.851 1.355 1.653 1.355h.375c.802 0 1.503-.582 1.653-1.355l.566-.496a3.375 3.375 0 0 0 .992-2.15V10.058Z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let audioContext;
+        let oscillator;
+        let gainNode;
+        let isPlaying = false;
+        let currentBeat = 0;
+        let nextNoteTime = 0.0;
+        let intervalId;
+
+        let bpm = 120;
+        let beatsPerMeasure = 4;
+        let noteValue = 4; // 4 for quarter note
+        let subdivision = 1; // 1 for no subdivision, 2 for eighths, 3 for triplets, 4 for sixteenths
+
+        const lookahead = 25.0; // Milliseconds
+        const scheduleAheadTime = 0.1; // Seconds
+
+        // DOM elements
+        const bpmDisplay = document.getElementById('bpm-display');
+        const bpmSlider = document.getElementById('bpm-slider');
+        const bpmIncrement = document.getElementById('bpm-increment');
+        const bpmDecrement = document.getElementById('bpm-decrement');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const tapTempoBtn = document.getElementById('tap-tempo-btn');
+        const timeSignatureNumerator = document.getElementById('time-signature-numerator');
+        const timeSignatureDenominator = document.getElementById('time-signature-denominator');
+        const subdivisionButtons = document.querySelectorAll('.subdivision-btn');
+        const volumeSlider = document.getElementById('volume-slider');
+        const beatIndicatorsContainer = document.getElementById('beat-indicators');
+
+        function updateBPM(newBPM) {
+            bpm = Math.max(40, Math.min(240, newBPM));
+            bpmDisplay.textContent = bpm;
+            bpmSlider.value = bpm;
+        }
+
+        function updateTimeSignatureIndicators() {
+            beatIndicatorsContainer.innerHTML = ''; // Clear existing indicators
+            for (let i = 0; i < beatsPerMeasure; i++) {
+                const indicator = document.createElement('div');
+                indicator.classList.add(
+                    'beat-indicator',
+                    'w-6', 'h-6', 'rounded-full', 'bg-accent-cyan/20', 'opacity-50', 'transition-all', 'duration-75',
+                    'transform', 'scale-90', 'hover:scale-100'
+                );
+                if (i === 0) {
+                    indicator.classList.add('first-beat'); // Mark first beat
+                    indicator.style.backgroundColor = 'hsl(260, 80%, 55%)'; // Slightly different color for accent
+                }
+                beatIndicatorsContainer.appendChild(indicator);
+            }
+        }
+
+        function setupAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Create master gain node
+                gainNode = audioContext.createGain();
+                gainNode.connect(audioContext.destination);
+                gainNode.gain.value = volumeSlider.value;
+            }
+        }
+
+        function playClick(time, isAccent = false, isSubdivision = false) {
+            setupAudioContext();
+
+            const frequency = isAccent ? 880 : (isSubdivision ? 330 : 440); // Higher freq for accent, lower for subdivision
+            const duration = 0.03; // Short click duration
+
+            oscillator = audioContext.createOscillator();
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine'; // A clean sine wave click
+
+            const clickGain = audioContext.createGain();
+            clickGain.gain.setValueAtTime(1, time);
+            clickGain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+            oscillator.connect(clickGain);
+            clickGain.connect(gainNode);
+
+            oscillator.start(time);
+            oscillator.stop(time + duration);
+        }
+
+        function scheduleNote() {
+            while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
+                const secondsPerBeat = 60.0 / bpm;
+                const noteInterval = secondsPerBeat / subdivision;
+
+                for (let i = 0; i < subdivision; i++) {
+                    const scheduledTime = nextNoteTime + (i * noteInterval);
+                    const isAccent = (currentBeat === 0 && i === 0);
+                    const isSubdivision = (i !== 0);
+                    playClick(scheduledTime, isAccent, isSubdivision);
+                    visualizeBeat(scheduledTime, currentBeat, i);
+                }
+
+                currentBeat = (currentBeat + 1) % beatsPerMeasure;
+                nextNoteTime += secondsPerBeat;
+            }
+        }
+
+        let visualTimeoutIds = [];
+        function visualizeBeat(scheduleTime, beatIndex, subdivisionIndex) {
+            if (!beatIndicatorsContainer.children.length) return;
+
+            const delay = (scheduleTime - audioContext.currentTime) * 1000;
+            const targetBeatIndex = beatIndex;
+
+            visualTimeoutIds.push(setTimeout(() => {
+                // Remove active class from all first, then add to current
+                beatIndicatorsContainer.querySelectorAll('.beat-indicator').forEach(el => {
+                    el.classList.remove('active', 'accent');
+                    el.style.backgroundColor = ''; // Reset inline style
+                });
+
+                if (beatIndicatorsContainer.children[targetBeatIndex]) {
+                    const indicator = beatIndicatorsContainer.children[targetBeatIndex];
+                    indicator.classList.add('active');
+                    if (targetBeatIndex === 0) {
+                        indicator.classList.add('accent');
+                    } else {
+                         indicator.style.backgroundColor = 'hsl(180, 70%, 65%)'; // Brighter cyan for non-accent beats
+                    }
+                }
+            }, delay));
+        }
+
+        function clearVisuals() {
+            visualTimeoutIds.forEach(clearTimeout);
+            visualTimeoutIds = [];
+            beatIndicatorsContainer.querySelectorAll('.beat-indicator').forEach(el => {
+                el.classList.remove('active', 'accent');
+                el.style.backgroundColor = '';
+            });
+        }
+
+        function startStopMetronome() {
+            if (!audioContext) {
+                setupAudioContext(); // Initialize context on first interaction
+            }
+
+            if (isPlaying) {
+                isPlaying = false;
+                clearInterval(intervalId);
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                clearVisuals();
+            } else {
+                isPlaying = true;
+                currentBeat = 0;
+                nextNoteTime = audioContext.currentTime;
+                intervalId = setInterval(scheduleNote, lookahead);
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                // Ensure initial visual state is clear
+                clearVisuals();
+            }
+        }
+
+        // Tap Tempo Logic
+        let tapTimes = [];
+        let tapTimeout;
+        function tapTempo() {
+            const now = Date.now();
+            tapTimes.push(now);
+
+            // Keep only the last 4 taps
+            if (tapTimes.length > 4) {
+                tapTimes.shift();
+            }
+
+            // Calculate average BPM if enough taps
+            if (tapTimes.length >= 2) {
+                let totalDiff = 0;
+                for (let i = 1; i < tapTimes.length; i++) {
+                    totalDiff += (tapTimes[i] - tapTimes[i-1]);
+                }
+                const avgDiff = totalDiff / (tapTimes.length - 1);
+                const newBPM = Math.round(60000 / avgDiff);
+                updateBPM(newBPM);
+            }
+
+            // Reset tap tempo after a short delay if no new taps
+            clearTimeout(tapTimeout);
+            tapTimeout = setTimeout(() => {
+                tapTimes = [];
+            }, 1500); // 1.5 seconds without a tap to reset
+        }
+
+
+        // Event Listeners
+        bpmSlider.addEventListener('input', (e) => updateBPM(parseInt(e.target.value)));
+        bpmIncrement.addEventListener('click', () => updateBPM(bpm + 1));
+        bpmDecrement.addEventListener('click', () => updateBPM(bpm - 1));
+        playPauseBtn.addEventListener('click', startStopMetronome);
+        tapTempoBtn.addEventListener('click', tapTempo);
+        volumeSlider.addEventListener('input', (e) => {
+            if (gainNode) {
+                gainNode.gain.value = e.target.value;
+            }
+        });
+
+        timeSignatureNumerator.addEventListener('change', (e) => {
+            beatsPerMeasure = parseInt(e.target.value);
+            updateTimeSignatureIndicators();
+            if (isPlaying) { // Restart metronome to apply new time signature immediately
+                startStopMetronome();
+                startStopMetronome();
+            }
+        });
+
+        timeSignatureDenominator.addEventListener('change', (e) => {
+            noteValue = parseInt(e.target.value);
+            // Note: denominator primarily affects visual note naming, for timing we always schedule per "beat"
+            // The actual beat interval is determined by BPM. This value is more for context.
+        });
+
+        subdivisionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                subdivisionButtons.forEach(btn => btn.classList.remove('bg-accent-purple/50', 'text-white'));
+                button.classList.add('bg-accent-purple/50', 'text-white');
+                subdivision = parseInt(button.dataset.subdivision);
+                if (isPlaying) {
+                    // Restart metronome to re-calculate schedule with new subdivision
+                    startStopMetronome();
+                    startStopMetronome();
+                }
+            });
+        });
+
+        // Initial setup
+        updateTimeSignatureIndicators(); // Create initial beat indicators
+        subdivisionButtons[0].classList.add('bg-accent-purple/50', 'text-white'); // Default subdivision button active
+    </script>
+</body>
+</html>
