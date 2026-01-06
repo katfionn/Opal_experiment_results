@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时热点聚合</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-bg': '#0D1117',
+                        'card-bg': 'rgba(23, 29, 41, 0.5)',
+                        'brand-text': '#E6F1FF',
+                        'brand-text-secondary': '#8B949E',
+                        'cyan-glow': '#33D7FF',
+                        'magenta-glow': '#F03D85',
+                        'weibo': '#F56E01',
+                        'bilibili': '#00A1D6',
+                        'douyin': '#FE2C55',
+                        'baidu': '#2932E1',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulse: {
+                            '50%': { opacity: '.5' },
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0D1117;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+        .glass-card {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--card-bg-color, rgba(23, 29, 41, 0.5));
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--glow-gradient);
+            opacity: 0.8;
+        }
+        .fade-in-item {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #8B949E;
+            border-radius: 10px;
+            border: 2px solid #0D1117;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #E6F1FF;
+        }
+    </style>
+</head>
+
+<body class="bg-brand-bg text-brand-text font-sans antialiased">
+    <div class="min-h-screen w-full p-4 sm:p-6 md:p-8">
+        <header class="text-center animate-fade-in-up">
+            <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-glow to-magenta-glow">
+                实时热点聚合
+            </h1>
+            <p class="mt-2 text-brand-text-secondary">汇聚全网最新、最热的焦点资讯</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+            <!-- Weibo Card -->
+            <div id="weibo-card" class="glass-card rounded-2xl p-6" style="--glow-gradient: linear-gradient(90deg, #F56E01, #FF9B42); animation-delay: 100ms; opacity: 0;" class="animate-fade-in-up">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-weibo/10 border border-weibo/30">
+                        <svg class="w-6 h-6 text-weibo" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.333 13.143c.476 0 .93.071 1.357.214.5.143.619.453.476.929-.143.476-.5.619-1.024.476a6.262 6.262 0 01-1.357-.215c-1.238-.357-2.548-.5-3.857-.5s-2.619.143-3.857.5c-.5.143-1.286.286-1.952.286-1.548 0-2.833-.429-3.833-1.286-.143-.143-.286-.286-.286-.428.143-.524.524-.619.929-.476.976.333 2.095.524 3.262.524.667 0 1.452-.143 1.952-.286 1.238-.357 2.548-.5 3.857-.5s2.619.143 3.857.5zm-5.476 3.5c-.357.476-.833.857-1.405 1.071-.476.143-.595.548-.452 1.024.143.476.548.595 1.024.452.93-.285 1.714-.833 2.238-1.595.357-.476.214-.976-.262-1.31-.476-.333-1.048-.214-1.143.358zM12 3.857C6.405 3.857 2 7.833 2 12.976c0 4.167 3.524 7.714 8.333 8.167.357 0 .5-.143.5-.5V19.31c0-.357-.143-.5-.5-.5-2.833-.357-5-2.5-5-5.333 0-2.976 2.643-5.333 5.929-5.333 3.286 0 5.929 2.357 5.929 5.333 0 1.357-.5 2.595-1.405 3.571-.238.238-.143.548.143.715.286.166.619.142.786-.143.93-.976 1.476-2.286 1.476-3.714C20.143 7.833 15.595 3.857 12 3.857z"/></svg>
+                    </div>
+                    <h2 class="font-display text-xl font-bold text-brand-text">微博热搜</h2>
+                </div>
+                <div id="weibo-content" class="mt-6 min-h-[200px]">
+                    <div class="loader-container"></div>
+                </div>
+            </div>
+
+            <!-- Bilibili Card -->
+            <div id="bilibili-card" class="glass-card rounded-2xl p-6" style="--glow-gradient: linear-gradient(90deg, #00A1D6, #00BFFF); animation-delay: 200ms; opacity: 0;" class="animate-fade-in-up">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-bilibili/10 border border-bilibili/30">
+                        <svg class="w-6 h-6 text-bilibili" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M15 6h2v2h-2V6zM7 6h2v2H7V6zm8 4h2v2h-2v-2zM7 10h2v2H7v-2zm8 4h2v2h-2v-2zM7 14h2v2H7v-2z"/><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zM5 19V5h14l.002 14H5z"/></svg>
+                    </div>
+                    <h2 class="font-display text-xl font-bold text-brand-text">B站热搜</h2>
+                </div>
+                <div id="bilibili-content" class="mt-6 min-h-[200px]">
+                    <div class="loader-container"></div>
+                </div>
+            </div>
+
+            <!-- Douyin Card -->
+            <div id="douyin-card" class="glass-card rounded-2xl p-6" style="--glow-gradient: linear-gradient(90deg, #FE2C55, #FF5C8A); animation-delay: 300ms; opacity: 0;" class="animate-fade-in-up">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-douyin/10 border border-douyin/30">
+                        <svg class="w-6 h-6 text-douyin" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.92 2.92 0 0 1 .53.05v-3.3a6.44 6.44 0 0 0-3.09 5.89 6.44 6.44 0 0 0 6.44 6.44 6.44 6.44 0 0 0 6.44-6.44V10.2a4.83 4.83 0 0 1 3.76-3.51z"/></svg>
+                    </div>
+                    <h2 class="font-display text-xl font-bold text-brand-text">抖音热点</h2>
+                </div>
+                <div id="douyin-content" class="mt-6 min-h-[200px]">
+                    <div class="loader-container"></div>
+                </div>
+            </div>
+            
+            <!-- Baidu Card -->
+            <div id="baidu-card" class="glass-card rounded-2xl p-6" style="--glow-gradient: linear-gradient(90deg, #2932E1, #5B63FF); animation-delay: 400ms; opacity: 0;" class="animate-fade-in-up">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-baidu/10 border border-baidu/30">
+                        <svg class="w-6 h-6 text-baidu" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12.756 12.336c-.03-.008-.06-.016-.09-.023a4.01 4.01 0 0 0-1.859-2.083c.37-.803.65-1.688.75-2.61a5.45 5.45 0 0 0-1.04-4.14C9.536 2.33 8.356 2 7.156 2a5.45 5.45 0 0 0-4.68 2.5c-.77 1.34-1 2.93-.83 4.54a4.01 4.01 0 0 0 1.96 2.65l-.01.03c-2.3.43-4.04 1.83-4.5 3.76-1.02 4.29.98 8.52 4.97 8.52 3.19 0 5.43-1.65 6.32-4.52.51-1.64.64-3.49.33-5.15zM8.386 4.366c.23-.39.55-.7.92-.88.37-.18.78-.22 1.17-.1.4.12.74.37.98.71.24.34.37.75.37 1.18 0 .4-.1.79-.29 1.15-.19.36-.46.68-.8.92-.34.24-.73.4-1.15.45-.42.05-.83 0-1.22-.16-.39-.16-.72-.42-.95-.78-.23-.36-.35-.77-.35-1.21 0-.44.13-.86.32-1.28zm2.25 15.5c-.9 2.1-2.58 3.01-4.56 2.5-2.73-.72-4.04-4.08-3.23-7.23.4-1.6 1.8-2.61 3.6-2.91a4.24 4.24 0 0 0 1.95-.56c.03.03.06.06.08.1.48.51.81 1.15 1 1.85-.3.12-.58.28-.84.47-.69.51-1.09 1.29-1.13 2.14a2.26 2.26 0 0 0 2.26 2.26c1.24 0 2.25-1.01 2.25-2.25 0-.9-.54-1.68-1.31-2.03.05-.2.08-.4.11-.6.1-.5.14-1 .13-1.51-.03-1.07-.3-2.12-.79-3.08a4.53 4.53 0 0 0 2.55 1.78c.45 1.5.29 3.2-.28 4.68-.69 1.8-1.78 3.3-3.14 4.34z"/></svg>
+                    </div>
+                    <h2 class="font-display text-xl font-bold text-brand-text">百度热搜</h2>
+                </div>
+                <div id="baidu-content" class="mt-6 min-h-[200px]">
+                    <div class="loader-container"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sources = [
+                { id: 'weibo', url: 'https://jkapi.com/api/wb_hot?limit=10' },
+                { id: 'bilibili', url: 'https://jkapi.com/api/bili_hot?limit=10' },
+                { id: 'douyin', url: 'https://jkapi.com/api/dy_hot?limit=10' },
+                { id: 'baidu', url: 'https://jkapi.com/api/bd_hot?limit=10' }
+            ];
+
+            const baseLinkUrl = 'https://www.aicpb.com/news/iframe?world=';
+
+            const loaderHTML = `
+                <div class="space-y-4">
+                    <div class="h-4 bg-gray-700 rounded w-5/6 animate-pulse"></div>
+                    <div class="h-4 bg-gray-700 rounded w-full animate-pulse" style="animation-delay: 0.1s;"></div>
+                    <div class="h-4 bg-gray-700 rounded w-4/6 animate-pulse" style="animation-delay: 0.2s;"></div>
+                    <div class="h-4 bg-gray-700 rounded w-5/6 animate-pulse" style="animation-delay: 0.3s;"></div>
+                    <div class="h-4 bg-gray-700 rounded w-3/6 animate-pulse" style="animation-delay: 0.4s;"></div>
+                </div>`;
+            
+            // Set initial loader state
+            document.querySelectorAll('.loader-container').forEach(el => el.innerHTML = loaderHTML);
+            
+            // Trigger card entrance animation
+            document.querySelectorAll('.glass-card').forEach(card => card.classList.add('animate-fade-in-up'));
+
+
+            function parseTextData(text) {
+                if (!text || typeof text !== 'string') return [];
+                const lines = text.trim().split('\n');
+                return lines.slice(1).map(line => {
+                    const parts = line.trim().match(/^\d+[,，\s.]*(.*?)(?:\s*\d+(\.\d+)?万)?$/);
+                    if (parts && parts[1]) {
+                        let title = parts[1].trim();
+                        if (title.endsWith('。')) {
+                            title = title.slice(0, -1);
+                        }
+                        return title;
+                    }
+                    return null;
+                }).filter(Boolean);
+            }
+
+            async function fetchAndRender(source) {
+                const contentEl = document.getElementById(`${source.id}-content`);
+                try {
+                    const response = await fetch(source.url);
+                    if (!response.ok) throw new Error(`Network response was not ok for ${source.id}`);
+                    
+                    const textData = await response.text();
+                    const titles = parseTextData(textData);
+
+                    if (titles.length === 0) {
+                         contentEl.innerHTML = `<p class="text-brand-text-secondary">未能解析到有效数据。</p>`;
+                         return;
+                    }
+
+                    const ol = document.createElement('ol');
+                    ol.className = 'space-y-4';
+                    
+                    titles.forEach((title, index) => {
+                        const li = document.createElement('li');
+                        li.className = 'flex items-start fade-in-item';
+                        li.style.animationDelay = `${index * 80}ms`;
+
+                        const numberSpan = document.createElement('span');
+                        numberSpan.textContent = `${index + 1}.`;
+                        numberSpan.className = 'text-brand-text-secondary font-medium w-6';
+
+                        const a = document.createElement('a');
+                        a.href = `${baseLinkUrl}${encodeURIComponent(title)}`;
+                        a.textContent = title;
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                        a.className = 'flex-1 text-brand-text hover:text-cyan-glow transition-colors duration-300';
+                        
+                        li.appendChild(numberSpan);
+                        li.appendChild(a);
+                        ol.appendChild(li);
+                    });
+                    
+                    contentEl.innerHTML = '';
+                    contentEl.appendChild(ol);
+
+                } catch (error) {
+                    console.error(`Error fetching data for ${source.id}:`, error);
+                    contentEl.innerHTML = `<p class="text-red-400">数据加载失败，请刷新重试。</p>`;
+                }
+            }
+
+            sources.forEach(fetchAndRender);
+        });
+    </script>
+</body>
+</html>
