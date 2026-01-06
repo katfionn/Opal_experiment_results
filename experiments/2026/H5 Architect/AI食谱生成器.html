@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>食材做饭 AI 食谱生成器</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#121b2e; --muted:#93a4c7; --text:#e8eeff;
+      --brand:#6ae4ff; --brand2:#9b7bff; --ok:#3ef0b2; --warn:#ffcf5a; --bad:#ff6b7a;
+      --border:rgba(255,255,255,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",Arial;
+      background: radial-gradient(1200px 700px at 20% 0%, rgba(106,228,255,.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 10%, rgba(155,123,255,.18), transparent 55%),
+                  linear-gradient(180deg, #070b14, #0b1220 35%, #0b1220);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .wrap{max-width:1100px; margin:0 auto; padding:22px 16px 40px}
+    header{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+      padding:16px 16px 10px; border:1px solid var(--border); background:rgba(18,27,46,.65);
+      border-radius:16px; backdrop-filter: blur(10px);
+    }
+    .title{display:flex; flex-direction:column; gap:6px}
+    .title h1{margin:0; font-size:18px; letter-spacing:.2px}
+    .title p{margin:0; color:var(--muted); font-size:13px; line-height:1.4}
+    .chips{display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end}
+    .chip{
+      font-size:12px; padding:7px 10px; border:1px solid var(--border);
+      background:rgba(255,255,255,.06); border-radius:999px; color:var(--muted)
+    }
+    .chip b{color:var(--text); font-weight:600}
+    main{display:grid; grid-template-columns: 1fr 1.15fr; gap:14px; margin-top:14px}
+    @media (max-width: 980px){ main{grid-template-columns:1fr;}}
+    .card{
+      border:1px solid var(--border); background:rgba(18,27,46,.65);
+      border-radius:16px; padding:14px; backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .card h2{margin:0 0 10px; font-size:14px; color:#dbe6ff; letter-spacing:.2px}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    @media (max-width: 520px){ .row{grid-template-columns:1fr;}}
+    label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
+    input, textarea, select{
+      width:100%; color:var(--text); background:rgba(255,255,255,.06);
+      border:1px solid var(--border); border-radius:12px; padding:10px 10px;
+      outline:none; font-size:14px;
+    }
+    textarea{min-height:120px; resize:vertical}
+    input:focus, textarea:focus, select:focus{border-color: rgba(106,228,255,.55); box-shadow: 0 0 0 3px rgba(106,228,255,.12)}
+    .hint{margin-top:6px; font-size:12px; color:var(--muted)}
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    button{
+      border:0; cursor:pointer; padding:10px 12px; border-radius:12px;
+      font-weight:650; font-size:14px; color:#07101e;
+      background: linear-gradient(90deg, var(--brand), var(--brand2));
+    }
+    button.secondary{
+      color:var(--text); background:rgba(255,255,255,.08); border:1px solid var(--border);
+      font-weight:600;
+    }
+    button.danger{
+      color:var(--text); background:rgba(255,107,122,.12); border:1px solid rgba(255,107,122,.35);
+    }
+    button:disabled{opacity:.55; cursor:not-allowed}
+    .status{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 12px; border-radius:12px; border:1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.04); margin-top:10px;
+      color:var(--muted); font-size:12px
+    }
+    .status .dot{width:8px; height:8px; border-radius:50%; background:rgba(147,164,199,.7)}
+    .status.ok .dot{background: rgba(62,240,178,.9)}
+    .status.bad .dot{background: rgba(255,107,122,.95)}
+    .status.warn .dot{background: rgba(255,207,90,.95)}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .result{
+      display:flex; flex-direction:column; gap:10px
+    }
+    .toolbar{
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:space-between; align-items:center
+    }
+    .toolbar .left, .toolbar .right{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+    .pill{
+      display:inline-flex; gap:8px; align-items:center; padding:8px 10px; border-radius:999px;
+      border:1px solid var(--border); background:rgba(255,255,255,.06); color:var(--muted);
+      font-size:12px
+    }
+    .pill strong{color:var(--text); font-weight:650}
+    .out{
+      border:1px solid var(--border); background:rgba(255,255,255,.04);
+      border-radius:14px; padding:12px; overflow:auto; min-height:300px
+    }
+    .out h3{margin:14px 0 8px; font-size:14px}
+    .out h3:first-child{margin-top:0}
+    .out ul{margin:6px 0 0 18px; color:#dbe6ff}
+    .out li{margin:4px 0; line-height:1.45}
+    .out p{margin:6px 0; color:#dbe6ff; line-height:1.55}
+    .out .meta{color:var(--muted); font-size:12px}
+    .split{height:1px; background:rgba(255,255,255,.10); margin:10px 0}
+    footer{margin-top:14px; color:var(--muted); font-size:12px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
+    .kbd{border:1px solid var(--border); background:rgba(255,255,255,.06); padding:2px 6px; border-radius:8px; font-size:11px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>食材做饭 AI 食谱生成器（H5）</h1>
+        <p>输入你手头食材 + 忌口/喜好 + 时间/设备，即可生成可执行的菜谱、步骤、时间表与替代方案。支持联网：可接入 OpenAI/兼容接口。</p>
+      </div>
+      <div class="chips">
+        <div class="chip"><b>主流程</b> 食材 → 约束 → 菜谱</div>
+        <div class="chip"><b>输出</b> 可复制/导出</div>
+        <div class="chip"><b>模式</b> 在线/本地兜底</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1) 你的条件</h2>
+
+        <div class="row">
+          <div>
+            <label for="ingredients">食材（必填）</label>
+            <textarea id="ingredients" placeholder="例：鸡胸肉 300g、土豆 2个、洋葱半个、鸡蛋2个、番茄2个、蒜、酱油、盐、黑胡椒"></textarea>
+            <div class="hint">支持用逗号/顿号/换行分隔。可写数量与单位。</div>
+          </div>
+          <div>
+            <label for="prefs">忌口与喜好（可选）</label>
+            <textarea id="prefs" placeholder="例：不吃香菜；少油少盐；不吃辣；对花生过敏；喜欢酸甜；增肌高蛋白"></textarea>
+            <div class="hint">会影响推荐口味、替代食材与做法。</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="cuisine">菜系偏好</label>
+            <select id="cuisine">
+              <option value="随意">随意</option>
+              <option value="家常">家常</option>
+              <option value="中式">中式</option>
+              <option value="川湘微辣/重口">川湘微辣/重口</option>
+              <option value="日式清淡">日式清淡</option>
+              <option value="韩式">韩式</option>
+              <option value="意面/西式">意面/西式</option>
+              <option value="减脂轻食">减脂轻食</option>
+              <option value="增肌高蛋白">增肌高蛋白</option>
+              <option value="一锅端/懒人">一锅端/懒人</option>
+            </select>
+          </div>
+          <div>
+            <label for="difficulty">难度</label>
+            <select id="difficulty">
+              <option value="简单">简单</option>
+              <option value="普通" selected>普通</option>
+              <option value="进阶">进阶</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="timeBudget">可用时间</label>
+            <select id="timeBudget">
+              <option value="15分钟">15分钟</option>
+              <option value="30分钟" selected>30分钟</option>
+              <option value="45分钟">45分钟</option>
+              <option value="60分钟">60分钟</option>
+              <option value="90分钟">90分钟</option>
+            </select>
+          </div>
+          <div>
+            <label for="servings">份数</label>
+            <select id="servings">
+              <option value="1">1人份</option>
+              <option value="2" selected>2人份</option>
+              <option value="3">3人份</option>
+              <option value="4">4人份</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="equipment">设备/调料补充</label>
+            <input id="equipment" placeholder="例：空气炸锅/烤箱/电饭煲/不粘锅；有：料酒、蚝油、孜然等" />
+            <div class="hint">不写也可以；会用于生成更贴合的步骤。</div>
+          </div>
+          <div>
+            <label for="goal">目标</label>
+            <select id="goal">
+              <option value="好吃优先" selected>好吃优先</option>
+              <option value="健康优先">健康优先</option>
+              <option value="减脂">减脂</option>
+              <option value="增肌">增肌</option>
+              <option value="省钱">省钱</option>
+              <option value="省时">省时</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="split"></div>
+
+        <h2>2) 联网（可选，推荐）</h2>
+        <div class="row">
+          <div>
+            <label for="provider">接口类型</label>
+            <select id="provider">
+              <option value="offline" selected>本地兜底（不联网）</option>
+              <option value="openai">OpenAI Responses API</option>
+              <option value="compatible">兼容 OpenAI 的第三方（自定义 Base URL）</option>
+            </select>
+            <div class="hint">纯前端直连会暴露 Key；建议通过你自己的后端代理转发。</div>
+          </div>
+          <div>
+            <label for="model">模型</label>
+            <input id="model" placeholder="例：gpt-4.1-mini / gpt-4o-mini / 你的兼容模型名" value="gpt-4.1-mini"/>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="baseUrl">Base URL（兼容模式用）</label>
+            <input id="baseUrl" placeholder="例：https://api.openai.com/v1 或 https://你的网关/v1" value="https://api.openai.com/v1"/>
+          </div>
+          <div>
+            <label for="apiKey">API Key（可留空）</label>
+            <input id="apiKey" placeholder="不建议在浏览器填写生产Key；仅用于演示" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="genBtn">生成食谱</button>
+          <button id="randomBtn" class="secondary">填入示例</button>
+          <button id="copyBtn" class="secondary" disabled>复制结果</button>
+          <button id="downloadBtn" class="secondary" disabled>导出 JSON</button>
+          <button id="clearBtn" class="danger">清空</button>
+        </div>
+
+        <div id="status" class="status">
+          <span style="display:flex;align-items:center;gap:10px">
+            <span class="dot"></span>
+            <span id="statusText">就绪：填写食材后点击“生成食谱”。</span>
+          </span>
+          <span class="mono" id="latency"></span>
+        </div>
+
+        <div class="hint" style="margin-top:10px">
+          快捷键：<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> 生成；
+          <span class="kbd">Esc</span> 取消请求（若支持）。
+        </div>
+      </section>
+
+      <section class="card result">
+        <div class="toolbar">
+          <div class="left">
+            <span class="pill">模式：<strong id="modePill">本地兜底</strong></span>
+            <span class="pill">份数：<strong id="servingsPill">2</strong></span>
+            <span class="pill">时间：<strong id="timePill">30分钟</strong></span>
+          </div>
+          <div class="right">
+            <span class="pill">结构化输出：<strong>是</strong></span>
+          </div>
+        </div>
+
+        <div id="output" class="out">
+          <p class="meta">结果将以结构化菜谱展示（含：菜名、概述、所用食材、可选补充、步骤、时间表、失败预案、替代方案、营养与过敏提示）。</p>
+          <div class="split"></div>
+          <p class="meta">提示：如果你选择“本地兜底”，会用内置规则生成可做的家常菜；如果联网，会调用大模型生成更丰富的菜谱。</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>© H5 Recipe AI Demo — 前端可运行</div>
+      <div class="mono">v1.0</div>
+    </footer>
+  </div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  const els = {
+    ingredients: $("ingredients"),
+    prefs: $("prefs"),
+    cuisine: $("cuisine"),
+    difficulty: $("difficulty"),
+    timeBudget: $("timeBudget"),
+    servings: $("servings"),
+    equipment: $("equipment"),
+    goal: $("goal"),
+    provider: $("provider"),
+    model: $("model"),
+    baseUrl: $("baseUrl"),
+    apiKey: $("apiKey"),
+    genBtn: $("genBtn"),
+    randomBtn: $("randomBtn"),
+    copyBtn: $("copyBtn"),
+    downloadBtn: $("downloadBtn"),
+    clearBtn: $("clearBtn"),
+    output: $("output"),
+    status: $("status"),
+    statusText: $("statusText"),
+    latency: $("latency"),
+    modePill: $("modePill"),
+    servingsPill: $("servingsPill"),
+    timePill: $("timePill"),
+  };
+
+  let lastRecipe = null;
+  let abortController = null;
+
+  const setStatus = (type, text, latencyMs) => {
+    els.status.className = "status" + (type ? " " + type : "");
+    els.statusText.textContent = text;
+    els.latency.textContent = (typeof latencyMs === "number") ? `${latencyMs} ms` : "";
+  };
+
+  const escapeHTML = (s) => (s ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+
+  const normalizeList = (text) => {
+    return (text || "")
+      .split(/[\n,，;；、]+/g)
+      .map(s => s.trim())
+      .filter(Boolean);
+  };
+
+  const nowISO = () => new Date().toISOString();
+
+  function buildPromptPayload() {
+    const ingredients = els.ingredients.value.trim();
+    if (!ingredients) throw new Error("请先填写“食材”。");
+
+    return {
+      timestamp: nowISO(),
+      input: {
+        ingredients_raw: ingredients,
+        ingredients_list: normalizeList(ingredients),
+        dietary_prefs_raw: els.prefs.value.trim(),
+        dietary_prefs_list: normalizeList(els.prefs.value.trim()),
+        cuisine: els.cuisine.value,
+        difficulty: els.difficulty.value,
+        time_budget: els.timeBudget.value,
+        servings: Number(els.servings.value),
+        equipment: els.equipment.value.trim(),
+        goal: els.goal.value
+      },
+      output_schema: {
+        title: "string",
+        summary: "string",
+        servings: "number",
+        time_total: "string",
+        difficulty: "string",
+        cuisine: "string",
+        ingredients_used: [{ name:"string", amount:"string", note:"string" }],
+        optional_additions: [{ name:"string", amount:"string", reason:"string" }],
+        steps: [{ idx:"number", text:"string", time:"string", tips:["string"] }],
+        timeline: [{ t:"string", action:"string" }],
+        substitutions: [{ from:"string", to:["string"], note:"string" }],
+        mistakes_and_fixes: [{ problem:"string", fix:"string" }],
+        allergens_and_safety: ["string"],
+        nutrition_notes: ["string"]
+      }
+    };
+  }
+
+  function offlineGenerate(payload) {
+    const ing = payload.input.ingredients_list;
+    const prefs = payload.input.dietary_prefs_list.join("；") || "无";
+    const servings = payload.input.servings;
+    const time = payload.input.time_budget;
+
+    const hasEgg = ing.some(x => /蛋/.test(x));
+    const hasTomato = ing.some(x => /番茄|西红柿/.test(x));
+    const hasChicken = ing.some(x => /鸡胸|鸡腿|鸡肉/.test(x));
+    const hasPotato = ing.some(x => /土豆/.test(x));
+    const hasOnion = ing.some(x => /洋葱/.test(x));
+    const hasRice = ing.some(x => /米|米饭|大米/.test(x));
+
+    let title = "家常什锦快炒";
+    if (hasTomato && hasEgg) title = "番茄炒蛋";
+    else if (hasChicken && (hasOnion || hasPotato)) title = "洋葱土豆鸡肉小炒";
+    else if (hasRice && hasEgg) title = "蛋炒饭（冰箱清空版）";
+
+    const saltNote = /少盐/.test(payload.input.dietary_prefs_raw) ? "（按少盐口味调整）" : "";
+    const spicyAvoid = /不吃辣|不辣/.test(payload.input.dietary_prefs_raw);
+
+    const ingredients_used = ing.slice(0, 10).map((name) => ({ name, amount:"适量", note:"来自你提供的食材" }));
+    const optional_additions = [
+      { name:"葱花", amount:"少许", reason:"增香（不喜欢可不放）" },
+      { name:"白胡椒", amount:"少许", reason:"提鲜去腥" },
+    ].filter(x => !(/不吃葱|不吃葱花/.test(payload.input.dietary_prefs_raw) && x.name.includes("葱")));
+
+    const steps = [];
+    if (title === "番茄炒蛋") {
+      steps.push(
+        { idx:1, text:`番茄切块；鸡蛋打散加少许盐${saltNote}。`, time:"5分钟", tips:["番茄去皮可选：划十字烫10秒更易出汁","鸡蛋里可加一勺温水更嫩"]},
+        { idx:2, text:"热锅少油，下蛋液快速划散，凝固即盛出。", time:"3分钟", tips:["火不要太大，避免蛋老"]},
+        { idx:3, text:"同锅少油，下番茄炒软出汁；加盐/糖少许调味。", time:"6分钟", tips:["喜欢酸甜：糖 1/2 茶匙","少盐就用生抽少量替代部分盐"]},
+        { idx:4, text:"倒回鸡蛋翻匀，收汁到你喜欢的浓度即可。", time:"2分钟", tips:["收汁更下饭；也可留汁拌面"]},
+      );
+    } else {
+      steps.push(
+        { idx:1, text:"把需要切的食材统一处理：肉切片/丁；耐炒蔬菜切块。", time:"8分钟", tips:["先切后炒更省时","肉类可加少许淀粉/生抽抓匀更嫩"]},
+        { idx:2, text:"热锅少油，先下蛋/肉类炒至变色（或蛋凝固）盛出。", time:"5分钟", tips:["少油：分两次少量用油更不粘"]},
+        { idx:3, text:"下耐炒蔬菜（如土豆/洋葱）翻炒，必要时加2-3勺水焖至断生。", time:"10分钟", tips:["土豆更快：切薄片","焖比猛炒更省油"]},
+        { idx:4, text:"回锅蛋/肉，按口味加盐、生抽等调味，翻匀出锅。", time:"4分钟", tips:[spicyAvoid ? "按“不辣”执行，不加辣椒制品" : "可加少许辣椒/辣酱增味"]},
+      );
+    }
+
+    const timeline = [
+      { t:"00:00-00:05", action:"洗切备菜、调味预备" },
+      { t:"00:05-00:12", action:"先炒蛋/肉并盛出" },
+      { t:"00:12-00:25", action:"炒蔬菜/焖熟" },
+      { t:"00:25-00:30", action:"合炒收尾、装盘" },
+    ];
+
+    const substitutions = [
+      { from:"盐", to:["生抽","味噌（少量）"], note:"少盐口味可降低用量，用鲜味补足" },
+      { from:"葱蒜", to:["洋葱碎","姜丝"], note:"不吃葱蒜可换洋葱/姜增香" }
+    ];
+
+    const mistakes_and_fixes = [
+      { problem:"太咸/口重", fix:"加少量水或番茄/土豆增体积；最后用糖/醋微调平衡" },
+      { problem:"不出汁/偏干", fix:"加2-3勺热水焖1-2分钟，或加番茄/少量淀粉水" },
+      { problem:"肉柴", fix:"下次先抓淀粉+少量油；大火快炒到变色即出锅，回锅再合炒" }
+    ];
+
+    const allergens_and_safety = [
+      "如对鸡蛋/大豆（酱油）/麸质等过敏，请替换调味或跳过相应食材。",
+      "肉类确保熟透；砧板生熟分开，避免交叉污染。"
+    ];
+
+    const nutrition_notes = [
+      payload.input.goal.includes("减脂") ? "减脂建议：少油、蔬菜占比提高、主食按需减量。" : "均衡建议：蔬菜+蛋白+适量主食，餐后饮水。",
+      payload.input.goal.includes("增肌") ? "增肌建议：提高优质蛋白（鸡胸/蛋/奶/豆制品），配合力量训练。" : "口味建议：用胡椒/醋/香草替代部分盐油。"
+    ];
+
+    return {
+      title,
+      summary: `基于你提供的食材生成：${title}。偏好/忌口：${prefs}。目标：${payload.input.goal}。`,
+      servings,
+      time_total: time,
+      difficulty: payload.input.difficulty,
+      cuisine: payload.input.cuisine,
+      ingredients_used,
+      optional_additions,
+      steps,
+      timeline,
+      substitutions,
+      mistakes_and_fixes,
+      allergens_and_safety,
+      nutrition_notes
+    };
+  }
+
+  function renderRecipe(recipe) {
+    const h = [];
+    h.push(`<h3>${escapeHTML(recipe.title)}</h3>`);
+    h.push(`<p>${escapeHTML(recipe.summary)}</p>`);
+    h.push(`<p class="meta">份数：${escapeHTML(String(recipe.servings))}｜总耗时：${escapeHTML(recipe.time_total)}｜难度：${escapeHTML(recipe.difficulty)}｜菜系：${escapeHTML(recipe.cuisine)}</p>`);
+    h.push(`<div class="split"></div>`);
+
+    const renderList = (items, mapFn) => `<ul>${items.map(mapFn).join("")}</ul>`;
+
+    h.push(`<h3>用到的食材</h3>`);
+    h.push(renderList(recipe.ingredients_used || [], it => `<li><b>${escapeHTML(it.name)}</b>：${escapeHTML(it.amount || "适量")}${it.note ? `（${escapeHTML(it.note)}）` : ""}</li>`));
+
+    if ((recipe.optional_additions || []).length) {
+      h.push(`<h3>可选补充（提升风味）</h3>`);
+      h.push(renderList(recipe.optional_additions, it => `<li><b>${escapeHTML(it.name)}</b>：${escapeHTML(it.amount || "适量")} —— ${escapeHTML(it.reason || "")}</li>`));
+    }
+
+    h.push(`<h3>步骤</h3>`);
+    h.push(`<ul>${(recipe.steps || []).map(s =>
+      `<li><b>Step ${s.idx}</b>（${escapeHTML(s.time || "")}）：${escapeHTML(s.text)}${
+        (s.tips && s.tips.length) ? `<div class="meta">小贴士：${escapeHTML(s.tips.join("；"))}</div>` : ""
+      }</li>`
+    ).join("")}</ul>`);
+
+    if ((recipe.timeline || []).length) {
+      h.push(`<h3>时间表</h3>`);
+      h.push(renderList(recipe.timeline, it => `<li><b>${escapeHTML(it.t)}</b>：${escapeHTML(it.action)}</li>`));
+    }
+
+    if ((recipe.substitutions || []).length) {
+      h.push(`<h3>替代方案</h3>`);
+      h.push(renderList(recipe.substitutions, it => `<li><b>${escapeHTML(it.from)}</b> → ${escapeHTML((it.to||[]).join(" / "))}${it.note ? `（${escapeHTML(it.note)}）` : ""}</li>`));
+    }
+
+    if ((recipe.mistakes_and_fixes || []).length) {
+      h.push(`<h3>失败预案（翻车了怎么办）</h3>`);
+      h.push(renderList(recipe.mistakes_and_fixes, it => `<li><b>${escapeHTML(it.problem)}</b>：${escapeHTML(it.fix)}</li>`));
+    }
+
+    if ((recipe.allergens_and_safety || []).length) {
+      h.push(`<h3>过敏与安全提示</h3>`);
+      h.push(renderList(recipe.allergens_and_safety, it => `<li>${escapeHTML(it)}</li>`));
+    }
+
+    if ((recipe.nutrition_notes || []).length) {
+      h.push(`<h3>营养与目标建议</h3>`);
+      h.push(renderList(recipe.nutrition_notes, it => `<li>${escapeHTML(it)}</li>`));
+    }
+
+    els.output.innerHTML = h.join("");
+  }
+
+  async function callLLM(payload) {
+    const provider = els.provider.value;
+    const model = els.model.value.trim() || "gpt-4.1-mini";
+    const baseUrl = els.baseUrl.value.trim().replace(/\/$/, "") || "https://api.openai.com/v1";
+    const apiKey = els.apiKey.value.trim();
+
+    // Build instruction: strict JSON
+    const system = `你是一个专业家庭厨师与营养顾问。根据用户“现有食材”和“忌口/喜好/时间/设备/目标”，生成一份可执行、好吃且安全的食谱。
+要求：
+- 必须严格输出JSON，且JSON必须符合用户提供的 output_schema（字段齐全、类型正确）。
+- 食谱应尽量只使用用户现有食材；若需要补充，请放入 optional_additions，并给出原因。
+- 步骤要具体可操作，包含时间与小贴士。
+- 必须考虑忌口/过敏、少油少盐、是否吃辣等限制。
+- 不能输出多余文本（包括代码块标记）。`;
+
+    const user = JSON.stringify(payload);
+
+    abortController = new AbortController();
+
+    // OpenAI Responses API
+    if (provider === "openai") {
+      if (!apiKey) throw new Error("联网模式需要 API Key（演示用）。更推荐你走后端代理。");
+      const url = baseUrl + "/responses";
+      const res = await fetch(url, {
+        method: "POST",
+        signal: abortController.signal,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+        body: JSON.stringify({
+          model,
+          input: [
+            { role: "system", content: [{ type: "text", text: system }] },
+            { role: "user", content: [{ type: "text", text: user }] }
+          ],
+          // Encourage JSON-only output
+          text: { format: { type: "json_object" } }
+        })
+      });
+      if (!res.ok) {
+        const t = await res.text().catch(()=> "");
+        throw new Error("请求失败：" + res.status + " " + t.slice(0, 300));
+      }
+      const data = await res.json();
+      const text = (data.output_text ?? "").trim();
+      return JSON.parse(text);
+    }
+
+    // OpenAI-compatible Chat Completions
+    if (provider === "compatible") {
+      if (!apiKey) throw new Error("联网模式需要 API Key（演示用）。更推荐你走后端代理。");
+      const url = baseUrl + "/chat/completions";
+      const res = await fetch(url, {
+        method: "POST",
+        signal: abortController.signal,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: user }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.7
+        })
+      });
+      if (!res.ok) {
+        const t = await res.text().catch(()=> "");
+        throw new Error("请求失败：" + res.status + " " + t.slice(0, 300));
+      }
+      const data = await res.json();
+      const text = (data.choices?.[0]?.message?.content ?? "").trim();
+      return JSON.parse(text);
+    }
+
+    // Offline fallback
+    return offlineGenerate(payload);
+  }
+
+  function setModePill() {
+    const p = els.provider.value;
+    els.modePill.textContent = (p === "offline") ? "本地兜底" : (p === "openai" ? "OpenAI" : "兼容接口");
+  }
+
+  function syncPills() {
+    els.servingsPill.textContent = els.servings.value;
+    els.timePill.textContent = els.timeBudget.value;
+    setModePill();
+  }
+
+  async function generate() {
+    let payload;
+    try {
+      payload = buildPromptPayload();
+    } catch (e) {
+      setStatus("warn", e.message);
+      return;
+    }
+
+    syncPills();
+
+    els.genBtn.disabled = true;
+    els.copyBtn.disabled = true;
+    els.downloadBtn.disabled = true;
+    const t0 = performance.now();
+    setStatus("", "生成中…");
+
+    try {
+      const recipe = await callLLM(payload);
+      const t1 = performance.now();
+      lastRecipe = { payload, recipe };
+
+      renderRecipe(recipe);
+      els.copyBtn.disabled = false;
+      els.downloadBtn.disabled = false;
+      setStatus("ok", "已生成。", Math.round(t1 - t0));
+    } catch (e) {
+      const t1 = performance.now();
+      if (e.name === "AbortError") {
+        setStatus("warn", "已取消请求。", Math.round(t1 - t0));
+      } else {
+        setStatus("bad", (e && e.message) ? e.message : "生成失败。", Math.round(t1 - t0));
+      }
+    } finally {
+      els.genBtn.disabled = false;
+      abortController = null;
+    }
+  }
+
+  function fillExample() {
+    const examples = [
+      {
+        ingredients: "鸡胸肉 300g、土豆 2个、洋葱 半个、蒜 3瓣、酱油、盐、黑胡椒、淀粉",
+        prefs: "少油少盐；不吃辣；想增肌高蛋白",
+        cuisine: "增肌高蛋白",
+        goal: "增肌",
+        time: "30分钟",
+        diff: "普通",
+        servings: "2",
+        equipment: "不粘锅；有：料酒、蚝油"
+      },
+      {
+        ingredients: "番茄 2个、鸡蛋 3个、葱、盐、糖、生抽",
+        prefs: "不吃葱；清淡；不吃太甜",
+        cuisine: "家常",
+        goal: "健康优先",
+        time: "15分钟",
+        diff: "简单",
+        servings: "2",
+        equipment: "炒锅"
+      },
+      {
+        ingredients: "米饭 1碗、鸡蛋 2个、火腿肠 1根、胡萝卜 半根、豌豆、酱油、盐",
+        prefs: "少油；不吃辣",
+        cuisine: "一锅端/懒人",
+        goal: "省时",
+        time: "15分钟",
+        diff: "简单",
+        servings: "1",
+        equipment: "不粘锅"
+      }
+    ];
+    const ex = examples[Math.floor(Math.random()*examples.length)];
+    els.ingredients.value = ex.ingredients;
+    els.prefs.value = ex.prefs;
+    els.cuisine.value = ex.cuisine;
+    els.goal.value = ex.goal;
+    els.timeBudget.value = ex.time;
+    els.difficulty.value = ex.diff;
+    els.servings.value = ex.servings;
+    els.equipment.value = ex.equipment;
+    syncPills();
+    setStatus("", "已填入示例：点击“生成食谱”。");
+  }
+
+  async function copyResult() {
+    if (!lastRecipe) return;
+    const text = JSON.stringify(lastRecipe.recipe, null, 2);
+    await navigator.clipboard.writeText(text);
+    setStatus("ok", "已复制 JSON 到剪贴板。");
+  }
+
+  function downloadJSON() {
+    if (!lastRecipe) return;
+    const blob = new Blob([JSON.stringify(lastRecipe, null, 2)], { type: "application/json;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `recipe_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+    setStatus("ok", "已导出 JSON 文件。");
+  }
+
+  function clearAll() {
+    els.ingredients.value = "";
+    els.prefs.value = "";
+    els.equipment.value = "";
+    lastRecipe = null;
+    els.output.innerHTML = `
+      <p class="meta">结果将以结构化菜谱展示（含：菜名、概述、所用食材、可选补充、步骤、时间表、失败预案、替代方案、营养与过敏提示）。</p>
+      <div class="split"></div>
+      <p class="meta">提示：如果你选择“本地兜底”，会用内置规则生成可做的家常菜；如果联网，会调用大模型生成更丰富的菜谱。</p>
+    `;
+    els.copyBtn.disabled = true;
+    els.downloadBtn.disabled = true;
+    setStatus("", "已清空。");
+  }
+
+  // events
+  els.genBtn.addEventListener("click", generate);
+  els.randomBtn.addEventListener("click", fillExample);
+  els.copyBtn.addEventListener("click", copyResult);
+  els.downloadBtn.addEventListener("click", downloadJSON);
+  els.clearBtn.addEventListener("click", clearAll);
+  els.provider.addEventListener("change", () => {
+    setModePill();
+    setStatus("", "已切换模式。");
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") generate();
+    if (e.key === "Escape" && abortController) abortController.abort();
+  });
+
+  syncPills();
+})();
+</script>
+</body>
+</html>
