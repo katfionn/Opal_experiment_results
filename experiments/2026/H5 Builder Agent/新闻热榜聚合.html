@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热榜聚合资讯</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Outfit for display, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-dark': 'hsl(220, 25%, 10%)',
+                        'accent-blue': 'hsl(210, 80%, 65%)',
+                        'accent-purple': 'hsl(260, 70%, 70%)',
+                        'text-light': 'hsl(210, 20%, 90%)',
+                        'text-medium': 'hsl(210, 15%, 70%)',
+                        'text-dark': 'hsl(210, 10%, 50%)',
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS for Glassmorphism and Background -->
+    <style>
+        body {
+            background-color: hsl(220, 25%, 10%); /* Primary dark background */
+            background-image: radial-gradient(at 0% 0%, hsl(260, 70%, 15%) 0px, transparent 50%),
+                              radial-gradient(at 100% 100%, hsl(210, 80%, 10%) 0px, transparent 50%);
+            min-height: 100vh;
+            color: hsl(210, 20%, 90%); /* text-light */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll on some gradient effects */
+        }
+
+        /* Base styles for display and body fonts */
+        @layer base {
+            html {
+                font-family: 'Inter', sans-serif;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                font-family: 'Outfit', sans-serif;
+            }
+        }
+
+        /* Glassmorphism Card Style */
+        .card-glass {
+            background: rgba(255, 255, 255, 0.05); /* Semi-transparent white */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Stronger shadow for depth */
+            transition: all 0.3s ease-in-out; /* Smooth transitions */
+        }
+
+        .card-glass:hover {
+            border-color: hsl(210, 80%, 65%); /* Accent blue border on hover */
+            transform: translateY(-3px); /* Subtle lift effect */
+            box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.45); /* Enhanced shadow on hover */
+        }
+
+        /* List Item Hover Effect */
+        .list-item-hover-effect a {
+            transition: all 0.2s ease-out; /* Smooth transition for links */
+        }
+        .list-item-hover-effect:hover a {
+            color: var(--hover-color, hsl(210, 80%, 65%)); /* Default accent-blue */
+            text-shadow: 0 0 8px var(--hover-color-shadow, hsl(210, 80%, 65%)); /* Glowing effect */
+            transform: translateX(5px); /* Slide effect */
+        }
+        .list-item-hover-effect:hover .num-span {
+            color: var(--hover-color-num, hsl(260, 70%, 70%)); /* Accent-purple for number */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 selection:bg-accent-purple selection:text-white">
+    <div class="container mx-auto w-full max-w-7xl pt-8 pb-16">
+        <!-- Main Title Section -->
+        <h1 class="text-5xl md:text-7xl font-display font-extrabold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-accent-blue to-accent-purple leading-tight">
+            热榜聚合资讯
+            <span class="block text-xl md:text-2xl font-sans font-light text-text-medium mt-2">一览全网热点，洞察瞬息万变</span>
+        </h1>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="text-center py-10">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-t-4 border-accent-blue border-t-accent-purple"></div>
+            <p class="text-text-medium mt-4 text-lg">正在加载热榜数据...</p>
+        </div>
+
+        <!-- Hot Search Grid (initially hidden) -->
+        <div id="hot-search-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Weibo Hot Search Card -->
+            <div id="weibo-card" class="card-glass p-6 flex flex-col justify-between" style="--hover-color: hsl(0, 80%, 70%); --hover-color-shadow: hsl(0, 80%, 70%); --hover-color-num: hsl(0, 70%, 80%);">
+                <h2 class="text-3xl font-display font-bold mb-5 bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-red-600">微博热搜</h2>
+                <ul id="weibo-list" class="space-y-3 text-lg font-sans text-text-light flex-grow"></ul>
+            </div>
+
+            <!-- Bilibili Hot Search Card -->
+            <div id="bili-card" class="card-glass p-6 flex flex-col justify-between" style="--hover-color: hsl(200, 80%, 70%); --hover-color-shadow: hsl(200, 80%, 70%); --hover-color-num: hsl(200, 70%, 80%);">
+                <h2 class="text-3xl font-display font-bold mb-5 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">B站热搜</h2>
+                <ul id="bili-list" class="space-y-3 text-lg font-sans text-text-light flex-grow"></ul>
+            </div>
+
+            <!-- Douyin Hot Search Card -->
+            <div id="douyin-card" class="card-glass p-6 flex flex-col justify-between" style="--hover-color: hsl(120, 70%, 65%); --hover-color-shadow: hsl(120, 70%, 65%); --hover-color-num: hsl(120, 60%, 75%);">
+                <h2 class="text-3xl font-display font-bold mb-5 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600">抖音热点</h2>
+                <ul id="douyin-list" class="space-y-3 text-lg font-sans text-text-light flex-grow"></ul>
+            </div>
+
+            <!-- Baidu Hot Search Card -->
+            <div id="baidu-card" class="card-glass p-6 flex flex-col justify-between" style="--hover-color: hsl(280, 70%, 65%); --hover-color-shadow: hsl(280, 70%, 65%); --hover-color-num: hsl(280, 60%, 75%);">
+                <h2 class="text-3xl font-display font-bold mb-5 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600">百度热搜</h2>
+                <ul id="baidu-list" class="space-y-3 text-lg font-sans text-text-light flex-grow"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://jkapi.com/api/';
+        const NEWS_LINK_BASE = 'https://www.aicpb.com/news/iframe?world=';
+
+        // Configuration for each hot search source
+        const hotSearchSources = [
+            { id: 'weibo', name: '微博热搜', url: `${API_BASE_URL}wb_hot?limit=10`, listId: 'weibo-list' },
+            { id: 'bili', name: 'B站热搜', url: `${API_BASE_URL}bili_hot?limit=10`, listId: 'bili-list' },
+            { id: 'douyin', name: '抖音热点', url: `${API_BASE_URL}dy_hot?limit=10`, listId: 'douyin-list' },
+            { id: 'baidu', name: '百度热搜', url: `${API_BASE_URL}bd_hot?limit=10`, listId: 'baidu-list' },
+        ];
+
+        /**
+         * Fetches data from a given URL and returns it as plain text.
+         * @param {string} url The API endpoint URL.
+         * @returns {Promise<string|null>} The response text or null if an error occurs.
+         */
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error(`Error fetching data from ${url}:`, error);
+                return null;
+            }
+        }
+
+        /**
+         * Parses a single line of hot search data to extract the clean title.
+         * This function handles various formats by removing leading rank/comma,
+         * trailing heat information, and any remaining punctuation/whitespace.
+         * @param {string} line The raw line of text from the API response.
+         * @returns {string} The cleaned hot search title.
+         */
+        function parseTitle(line) {
+            // 1. Remove leading rank and comma (e.g., "1," or "1，")
+            let cleanedLine = line.replace(/^\d+[,，]\s*/, '');
+
+            // 2. Remove trailing heat information (e.g., ".217.8万", ".1200.4万")
+            // This regex matches patterns like ".123万", ".123.4万" at the end of the string,
+            // including both English and Chinese dots.
+            cleanedLine = cleanedLine.replace(/[\.．]\d+(\.\d+)?万\s*$/, '');
+
+            // 3. Remove any remaining trailing punctuation (e.g., ".", "。", "!") and trim whitespace
+            // This ensures titles like "B站跨晚。" become "B站跨晚"
+            cleanedLine = cleanedLine.replace(/[\.。！\s]+$/, '').trim();
+            
+            return cleanedLine;
+        }
+
+        /**
+         * Renders hot search data from all configured sources into the DOM.
+         */
+        async function renderHotSearch() {
+            // Show loading spinner and hide the grid
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            document.getElementById('hot-search-grid').classList.add('hidden');
+
+            const allPromises = hotSearchSources.map(async (source) => {
+                const data = await fetchData(source.url);
+                const listElement = document.getElementById(source.listId);
+                listElement.innerHTML = ''; // Clear previous content
+
+                if (data) {
+                    const lines = data.split('\n').filter(line => line.trim() !== '');
+                    // Skip the first line which is typically a header/timestamp line
+                    const hotItems = lines.slice(1);
+
+                    hotItems.forEach((itemText, index) => {
+                        const title = parseTitle(itemText);
+                        if (title) { // Only render if a valid title was extracted
+                            const listItem = document.createElement('li');
+                            listItem.classList.add('flex', 'items-start', 'relative', 'group', 'list-item-hover-effect'); // Group for hover effects
+                            
+                            // Add a subtle number indicator or bullet point
+                            const numSpan = document.createElement('span');
+                            numSpan.textContent = `${index + 1}. `;
+                            numSpan.classList.add('num-span', 'text-text-medium', 'font-sans', 'text-base', 'mr-2', 'flex-shrink-0', 'transition-all', 'duration-200');
+
+                            const link = document.createElement('a');
+                            link.href = `${NEWS_LINK_BASE}${encodeURIComponent(title)}`;
+                            link.target = '_blank'; // Open link in a new tab
+                            link.rel = 'noopener noreferrer'; // Security best practice
+                            link.textContent = title;
+                            link.classList.add('block', 'text-text-light'); // Basic styling, hover handled by CSS class
+
+                            listItem.appendChild(numSpan);
+                            listItem.appendChild(link);
+                            listElement.appendChild(listItem);
+                        }
+                    });
+                } else {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `无法加载${source.name}数据。`;
+                    listItem.classList.add('text-text-dark', 'text-sm');
+                    listElement.appendChild(listItem);
+                }
+            });
+
+            // Wait for all data fetching and rendering to complete
+            await Promise.all(allPromises);
+
+            // Hide loading spinner and show the grid
+            document.getElementById('loading-spinner').classList.add('hidden');
+            document.getElementById('hot-search-grid').classList.remove('hidden');
+        }
+
+        // Execute renderHotSearch when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', renderHotSearch);
+    </script>
+</body>
+</html>
